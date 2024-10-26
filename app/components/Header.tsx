@@ -3,7 +3,7 @@ import Link from "next/link";
 export function Header() {
   return (
     <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="container-custom mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-orange-500">
           klook
         </Link>

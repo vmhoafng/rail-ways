@@ -36,7 +36,7 @@ export default function DatePicker() {
             <Button
               key={index}
               variant="ghost"
-              className={`flex flex-col items-center justify-center min-w-[70px] h-20 rounded-lg transition-colors ${
+              className={`flex flex-col items-center justify-center gap-1 p-0 size-16 rounded-lg transition-colors ${
                 isSameDay(date, selectedDate)
                   ? "bg-orange-100 text-orange-600"
                   : "hover:bg-gray-100"

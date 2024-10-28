@@ -1,6 +1,6 @@
 "use client";
 import SearchForm from "./components/SearchForm";
-import FAQAccordion  from "./components/FAQAccordion";
+import FAQAccordion from "./components/FAQAccordion";
 
 export default function HomePage() {
   return (

@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Clock, Train, ChevronRight } from "lucide-react";
-
+import Seats from "./Seats";
 interface TrainOptionProps {
   departureTime: string;
   arrivalTime: string;
@@ -75,7 +75,9 @@ export default function TrainOptionCard({
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="seat">Nội dung chọn ghế</TabsContent>
+          <TabsContent value="seat">
+            <Seats />
+          </TabsContent>
           <TabsContent value="itinerary">Nội dung lịch trình</TabsContent>
           <TabsContent value="amenities">Nội dung tiện ích</TabsContent>
           <TabsContent value="policy">Nội dung chính sách</TabsContent>

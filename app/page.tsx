@@ -8,7 +8,7 @@ export default function HomePage() {
       <h1 className="text-3xl font-bold mb-6">Di chuyển</h1>
       <SearchForm />
       <div className="mt-8">
-        <FAQAccordion />
+        <FAQAccordion className="px-8 py-4"/>
       </div>
     </div>
   );

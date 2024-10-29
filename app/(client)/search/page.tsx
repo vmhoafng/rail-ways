@@ -1,3 +1,4 @@
+"use client";
 import SearchForm from "@/app/components/SearchForm";
 import DatePicker from "../../components/DatePicker";
 import { TimeFilter } from "../../components/TimeFilter";
@@ -5,8 +6,18 @@ import TrainOption from "../../components/TrainOption";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import FAQAccordion from "@/app/components/FAQAccordion";
+import { useState } from "react";
 
 export default function SearchPage() {
+  const timeRanges = ["00:00-08:59", "09:00-11:59", "12:00-16:59"];
+  const [timePicked, setTimePicked] = useState<string[]>([]);
+  const filterTimeRanges = (time: string) => {
+    if (timePicked.includes(time)) {
+      setTimePicked(timePicked.filter((t) => t !== time));
+    } else {
+      setTimePicked([...timePicked, time]);
+    }
+  };
   return (
     <div className="container-custom mx-auto px-4 py-8">
       <SearchForm />
@@ -21,7 +32,11 @@ export default function SearchPage() {
         </div>
         <div className="w-3/4">
           <DatePicker />
-          <TimeFilter />
+          <TimeFilter
+            timePicked={timePicked}
+            filterTimeRanges={filterTimeRanges}
+            timeRanges={timeRanges}
+          />
           <div className="space-y-4 mt-6">
             <TrainOption
               departureTime="06:00"

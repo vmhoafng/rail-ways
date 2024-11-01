@@ -9,9 +9,9 @@ import TripInfo from './TripInfo'
 import PriceDetails from './PriceDetails'
 
 const paymentMethods = [
-    { id: 'momo', name: 'MoMo', logo: '/placeholder.svg?height=24&width=24' },
-    { id: 'atm', name: 'Thẻ ATM nội địa', logo: '/placeholder.svg?height=24&width=24' },
-    { id: 'visa', name: 'Thẻ Visa/Master/JCB', logo: '/placeholder.svg?height=24&width=24' },
+    { id: 'momo', name: 'MoMo', logo: 'https://storage.googleapis.com/futa-busline-web-cms-prod/momo_bb732ac6f7/momo_bb732ac6f7.svg' },
+    { id: 'atm', name: 'Thẻ ATM nội địa', logo: 'https://storage.googleapis.com/futa-busline-web-cms-prod/Logo_Shopee_Pay_2024_1fb07ef622/Logo_Shopee_Pay_2024_1fb07ef622.png' },
+    { id: 'visa', name: 'Thẻ Visa/Master/JCB', logo: 'https://storage.googleapis.com/futa-busline-web-cms-prod/visa_logo_3d2a20b162/visa_logo_3d2a20b162.png' },
 ]
 
 export default function PaymentForm() {
@@ -63,7 +63,7 @@ export default function PaymentForm() {
             </div>
             <div className="flex justify-end space-x-4">
                 <Button variant="outline">Hủy</Button>
-                <Button>Thanh toán</Button>
+                <Button className='bg-orange-600 hover:bg-orange-500'>Thanh toán</Button>
             </div>
 
         </div>

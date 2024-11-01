@@ -229,7 +229,6 @@ const DataTable: React.FC<DataTableProps> = ({ fields, data, onEdit }) => (
         {data.map((item, index) => (
           <TableRow key={index}>
             {fields.map((field, fieldIndex) => {
-              console.log();
               return (
                 <TableCell key={fieldIndex}>
                   {item[removeAccents(field.toLowerCase().replace(" ", ""))]}

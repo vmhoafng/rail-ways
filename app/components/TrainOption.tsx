@@ -1,25 +1,82 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Clock, Train, ChevronRight } from "lucide-react";
 import Seats from "./Seats";
+import { useActiveTrainContext } from "../context/ActiveTrainContext";
+import { useSeatsContext } from "../context/SeatsContext";
+import Link from "next/link";
+
 interface TrainOptionProps {
+  trainId: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;
   price: number;
   trainType: string;
+  availableSeats: string[];
 }
 
 export default function TrainOptionCard({
+  trainId,
   departureTime,
   arrivalTime,
   duration,
   price,
   trainType,
+  availableSeats,
 }: TrainOptionProps) {
-  const [activeTab, setActiveTab] = useState("seat");
+  const { activeState, setActiveState } = useActiveTrainContext();
+  const { updateTrain, getTrainInfo } = useSeatsContext();
+  const isActive = activeState.trainId === trainId;
+  const updateTrainInfo = useCallback(() => {
+    const existingTrainInfo = getTrainInfo(trainId);
+    if (
+      !existingTrainInfo ||
+      existingTrainInfo.departureTime !== departureTime ||
+      existingTrainInfo.arrivalTime !== arrivalTime ||
+      existingTrainInfo.duration !== duration ||
+      existingTrainInfo.price !== price ||
+      existingTrainInfo.trainType !== trainType ||
+      JSON.stringify(existingTrainInfo.availableSeats) !==
+        JSON.stringify(availableSeats)
+    ) {
+      updateTrain({
+        trainId,
+        departureTime,
+        arrivalTime,
+        duration,
+        price,
+        trainType,
+        availableSeats,
+        selectedSeats: existingTrainInfo?.selectedSeats || [],
+      });
+    }
+  }, [
+    trainId,
+    departureTime,
+    arrivalTime,
+    duration,
+    price,
+    trainType,
+    availableSeats,
+    updateTrain,
+    getTrainInfo,
+  ]);
+
+  useEffect(() => {
+    updateTrainInfo();
+  }, [updateTrainInfo]);
+
+  const handleTabClick = (tabValue: string) => {
+    if (isActive && activeState.activeTab === tabValue) {
+      setActiveState({ trainId: null, activeTab: null });
+    } else {
+      setActiveState({ trainId, activeTab: tabValue });
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
@@ -31,7 +88,6 @@ export default function TrainOptionCard({
           </div>
           <div className="text-sm text-gray-500 flex items-center">
             {duration}
-            <span className="text-xs ml-1">(Asian/Ho Chi Minh)</span>
           </div>
           <div className="flex items-center space-x-2">
             <Clock className="w-4 h-4 text-orange-500" />
@@ -54,8 +110,10 @@ export default function TrainOptionCard({
             <span className="text-green-600 font-medium">Còn chỗ</span>
           </div>
         </div>
-        <Tabs defaultValue="seat" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-md">
+        <Tabs
+          value={isActive ? activeState.activeTab || "" : ""}
+          className="w-full">
+          <TabsList className="flex justify-between w-full items-center bg-gray-100 p-1 h-fit rounded-md">
             {[
               { value: "seat", label: "Chọn ghế" },
               { value: "itinerary", label: "Lịch trình" },
@@ -65,9 +123,9 @@ export default function TrainOptionCard({
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={`text-sm py-1.5 ${
-                  activeTab === tab.value
+                onClick={() => handleTabClick(tab.value)}
+                className={`text-sm py-1.5 w-1/4 ${
+                  isActive && activeState.activeTab === tab.value
                     ? "bg-white shadow rounded-md"
                     : "text-gray-600 hover:text-gray-800"
                 }`}>
@@ -76,20 +134,36 @@ export default function TrainOptionCard({
             ))}
           </TabsList>
           <TabsContent value="seat">
-            <Seats />
+            {isActive && activeState.activeTab === "seat" && (
+              <Seats trainId={trainId} />
+            )}
           </TabsContent>
-          <TabsContent value="itinerary">Nội dung lịch trình</TabsContent>
-          <TabsContent value="amenities">Nội dung tiện ích</TabsContent>
-          <TabsContent value="policy">Nội dung chính sách</TabsContent>
+          <TabsContent value="itinerary">
+            {isActive &&
+              activeState.activeTab === "itinerary" &&
+              "Nội dung lịch trình"}
+          </TabsContent>
+          <TabsContent value="amenities">
+            {isActive &&
+              activeState.activeTab === "amenities" &&
+              "Nội dung tiện ích"}
+          </TabsContent>
+          <TabsContent value="policy">
+            {isActive &&
+              activeState.activeTab === "policy" &&
+              "Nội dung chính sách"}
+          </TabsContent>
         </Tabs>
       </div>
       <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center">
         <span className="text-2xl font-bold text-orange-500">
           {price.toLocaleString()}¥
         </span>
-        <Button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-md">
-          Chọn chuyến
-        </Button>
+        <Link href={`/booking/${trainId}`}>
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-md">
+            Chọn chuyến
+          </Button>
+        </Link>
       </div>
     </div>
   );

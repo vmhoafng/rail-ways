@@ -92,7 +92,7 @@ export default function Seats({ trainId }: SeatsProps) {
     <div className="max-w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto p-2 sm:p-4">
       <div className="w-full flex justify-center space-x-1 sm:space-x-2 mb-4 sm:mb-8 pb-2">
         <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
-        <div className="overflow-x-scroll scrollbar-hide w-full flex gap-2">
+        <div className="overflow-x-scroll w-full flex gap-2">
           {["SE1", "SE2"].map((car) => (
             <button
               key={car}
@@ -114,7 +114,7 @@ export default function Seats({ trainId }: SeatsProps) {
         Toa số {selectedCar}: Ngồi mềm điều hòa
       </h2>
 
-      <div className="border-2 sm:border-4 border-gray-300 rounded-lg p-2 sm:p-4 bg-gray-100 overflow-x-scroll scrollbar-hide">
+      <div className="border-2 sm:border-4 border-gray-300 rounded-lg p-2 sm:p-4 bg-gray-100 overflow-x-scroll">
         <div className="lg:flex w-full justify-between items-center mb-2 sm:mb-4 hidden">
           <div className="w-8 h-6 sm:w-12 sm:h-8 md:w-16 md:h-10 bg-gray-400 rounded-r-full"></div>
           <div className="w-8 h-6 sm:w-12 sm:h-8 md:w-16 md:h-10 bg-gray-400 rounded-l-full"></div>

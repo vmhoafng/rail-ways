@@ -31,7 +31,7 @@ export default function DatePicker() {
         <Button variant="ghost" size="icon" onClick={handlePrevious}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+        <div className="flex space-x-2 overflow-x-auto">
           {dates.map((date, index) => (
             <Button
               key={index}

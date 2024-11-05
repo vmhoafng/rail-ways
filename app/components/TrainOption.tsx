@@ -8,6 +8,7 @@ import Seats from "./Seats";
 import { useActiveTrainContext } from "../context/ActiveTrainContext";
 import { useSeatsContext } from "../context/SeatsContext";
 import Link from "next/link";
+import ContactInfo from "./ContactInfo";
 
 interface TrainOptionProps {
   trainId: string;
@@ -139,9 +140,9 @@ export default function TrainOptionCard({
             )}
           </TabsContent>
           <TabsContent value="itinerary">
-            {isActive &&
-              activeState.activeTab === "itinerary" &&
-              "Nội dung lịch trình"}
+            {isActive && activeState.activeTab === "itinerary" && (
+              <ContactInfo />
+            )}
           </TabsContent>
           <TabsContent value="amenities">
             {isActive &&

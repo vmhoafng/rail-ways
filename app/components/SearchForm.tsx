@@ -17,8 +17,8 @@ import React, { useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
 
 export default function SearchForm() {
-  const [from, setFrom] = useState("Tokyo");
-  const [to, setTo] = useState("Osaka");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const { openMenus, toggleMenu, closeAllMenus } = useDropdownMenu();
   const [date, setDate] = React.useState<Date | undefined>(
     new Date(Date.now())
@@ -26,6 +26,8 @@ export default function SearchForm() {
   const [returnDate, setReturnDate] = React.useState<Date | undefined>(
     new Date(Date.now())
   );
+  const ValiDate = (day: Date) =>
+    isBefore(day, startOfToday()) || (date ? isBefore(day, date) : false);
   const refFrom = useRef<HTMLInputElement>(null);
   const refTo = useRef<HTMLInputElement>(null);
   const [trip, setTrip] = useState<"one-way" | "round-trip">("one-way");
@@ -301,7 +303,10 @@ export default function SearchForm() {
                       disabled={(day) => isBefore(day, startOfToday())}
                       mode="single"
                       selected={date}
-                      onSelect={setDate}
+                      onSelect={(selectedDate) => {
+                        setDate(selectedDate); // Set the selected date
+                        setReturnDate(undefined); // Set the return date if needed
+                      }}
                       initialFocus
                       className="w-full"
                     />
@@ -331,7 +336,7 @@ export default function SearchForm() {
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
-                      disabled={(day) => isBefore(day, startOfToday())}
+                      disabled={(day) => ValiDate(day)}
                       mode="single"
                       selected={returnDate}
                       onSelect={setReturnDate}

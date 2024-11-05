@@ -10,12 +10,9 @@ export const ENDPOINTS = {
     REGISTER: "",
     PROFILE: "",
   },
-  MOVIE: {
-    STATUS: {
-      "showing-now": "/movies/showing-now",
-      "coming-soon": "/movies/coming-soon",
-    },
-    DETAIL: `/movies/${PARAMS.SEARCH}/shows`,
+  TRAIN: {
+    LIST: "trains",
+    DETAIL: `/train/${PARAMS.SEARCH}`,
   },
   CINEMA: {
     LIST: "/cinemas",

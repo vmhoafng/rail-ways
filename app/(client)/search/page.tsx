@@ -1,8 +1,10 @@
 "use client";
 
+import DatePicker from "@/app/components/DatePicker";
+import { TimeFilter } from "@/app/components/TimeFilter";
 import TrainOption from "@/app/components/TrainOption";
 import { ActiveTrainProvider } from "@/app/context/ActiveTrainContext";
-import React from "react";
+import React, { useState } from "react";
 interface TrainJourney {
   trainId: string;
   departureStationName: string;
@@ -73,8 +75,24 @@ const trainJourneyData: TrainJourney = {
   ],
 };
 const page = () => {
+   const timeRanges = ["00:00-08:59", "09:00-11:59", "12:00-16:59"];
+  const [timePicked, setTimePicked] = useState<string[]>([]);
+
+  const filterTimeRanges = (time: string) => {
+    setTimePicked((prevTimes) =>
+      prevTimes.includes(time)
+        ? prevTimes.filter((t) => t !== time)
+        : [...prevTimes, time]
+    );
+  };
   return (
     <ActiveTrainProvider>
+      <DatePicker />
+      <TimeFilter
+        timePicked={timePicked}
+        filterTimeRanges={filterTimeRanges}
+        timeRanges={timeRanges}
+      />
       <div className="space-y-4 mt-6">
         <TrainOption
           availableSeats={trainJourneyData.seatNumbersAvailable}

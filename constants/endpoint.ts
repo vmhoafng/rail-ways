@@ -11,11 +11,14 @@ export const ENDPOINTS = {
     PROFILE: "",
   },
   TRAIN: {
-    LIST: "trains",
+    LIST: "/train/anonymous/get-all",
     DETAIL: `/train/${PARAMS.SEARCH}`,
   },
-  CINEMA: {
-    LIST: "/cinemas",
+  SCHEDULE: {
+    GET_BY_INFO: "schedule/anonymous/get-by-departure-and-arrival",
+  },
+  STATION: {
+    LIST: "/station/anonymous/get-all",
     DETAIL: "",
   },
   SHOW: {

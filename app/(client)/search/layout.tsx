@@ -10,7 +10,12 @@ import { useState } from "react";
 import { apiService } from "@/lib/apiService";
 import PageLayout from "@/app/components/layout/PageLayout";
 
-const SearchLayout: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+const SearchLayout: React.FC<
+  React.PropsWithChildren<{
+    children: React.ReactNode;
+    depature: React.ReactNode;
+  }>
+> = ({ children, depature }) => {
   return (
     <PageLayout header="Tìm kiếm" withSearchForm>
       {children}

@@ -140,9 +140,7 @@ export default function TrainOptionCard({
             )}
           </TabsContent>
           <TabsContent value="itinerary">
-            {isActive && activeState.activeTab === "itinerary" && (
-              <ContactInfo />
-            )}
+            {isActive && activeState.activeTab === "itinerary"}
           </TabsContent>
           <TabsContent value="amenities">
             {isActive &&

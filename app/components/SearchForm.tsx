@@ -15,8 +15,17 @@ import {
 import { ArrowRightLeft } from "lucide-react";
 import React, { useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
-
-export default function SearchForm() {
+import { getSchedule } from "../service/schedule";
+interface StationsProps {
+  id: string;
+  name: string;
+  address: boolean;
+}
+export default function SearchForm({
+  stations,
+}: {
+  stations: StationsProps[];
+}) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const { openMenus, toggleMenu, closeAllMenus } = useDropdownMenu();
@@ -31,20 +40,33 @@ export default function SearchForm() {
   const refFrom = useRef<HTMLInputElement>(null);
   const refTo = useRef<HTMLInputElement>(null);
   const [trip, setTrip] = useState<"one-way" | "round-trip">("one-way");
-  const popularRoutes = [
-    "Tokyo - Kyoto",
-    "Tokyo - Osaka",
-    "Asakusa - Tobu Nikko",
-  ];
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (trip === "one-way") {
+      const formData = {
+        departureStationId: from,
+        arrivalStationId: to,
+        departureTime: date && date.getTime(),
+      };
+      console.log(await getSchedule(formData));
+    }
+    if (trip === "round-trip") {
+      const formData = {
+        departureStationId: from,
+        arrivalStationId: to,
+        departureTime: date && date.getTime(),
+      };
+      console.log(getSchedule(formData));
+    }
+    // Tạo object chứa dữ liệu form
 
-  const departureStations = [
-    { name: "Kyoto", popular: true },
-    { name: "Tokyo", popular: false },
-    { name: "Osaka", popular: false },
-  ];
+    // Gửi dữ liệu hoặc thực hiện hành động tiếp theo
+  };
 
   return (
-    <div className="w-full bg-white shadow-lg rounded-lg">
+    <form
+      onSubmit={handleSubmit}
+      className="w-full bg-white shadow-lg rounded-lg">
       <div className="p-5 rounded-b-md">
         <RadioGroup
           onValueChange={(value) => setTrip(value as "one-way" | "round-trip")}
@@ -115,45 +137,26 @@ export default function SearchForm() {
                   />
                   {openMenus["from"] && (
                     <div className="p-4 mt-2 bg-white w-full absolute rounded-lg shadow-md max-h-96 overflow-y-scroll z-20">
-                      <h3 className="mb-2 flex items-center">
-                        Các tuyến phổ
-                        <span className="ml-2 px-2 bg-orange-500 text-white rounded-full rounded-bl-none">
-                          Hot
-                        </span>
-                      </h3>
-                      <ul className="space-y-3">
-                        {popularRoutes.map((route, index) => (
-                          <li
-                            key={index}
-                            className="text-gray-600 hover:text-gray-900 cursor-pointer">
-                            {route}
-                          </li>
-                        ))}
-                      </ul>
                       <h3 className="font-semibold text-lg mt-4 mb-2">
                         Ga khởi hành
                       </h3>
                       <ul className="space-y-3">
-                        {departureStations.map((station, index) => (
-                          <li
-                            onClick={(e) => {}}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setFrom(station.name);
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            key={index}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            {station.name}
-                            {station.popular && (
-                              <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
-                                Phổ biến
-                              </span>
-                            )}
-                          </li>
-                        ))}
+                        {stations
+                          .filter((station) => station.name !== to)
+                          .map((station, index) => (
+                            <li
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setFrom(station.name);
+                                refFrom.current?.blur();
+                                closeAllMenus();
+                              }}
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              {station.name}
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   )}
@@ -192,44 +195,26 @@ export default function SearchForm() {
                   />
                   {openMenus["to"] && (
                     <div className="p-4 mt-2 bg-white w-full absolute rounded-lg shadow-md max-h-96 overflow-y-scroll z-20">
-                      <h3 className="mb-2 flex items-center">
-                        Các tuyến phổ biến
-                        <span className="ml-2 px-2 bg-orange-500 text-white rounded-full rounded-bl-none">
-                          Hot
-                        </span>
-                      </h3>
-                      <ul className="space-y-3">
-                        {popularRoutes.map((route, index) => (
-                          <li
-                            key={index}
-                            className="text-gray-600 hover:text-gray-900 cursor-pointer">
-                            {route}
-                          </li>
-                        ))}
-                      </ul>
                       <h3 className="font-semibold text-lg mt-4 mb-2">
-                        Ga khởi hành
+                        Ga đến
                       </h3>
                       <ul className="space-y-3">
-                        {departureStations.map((station, index) => (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setTo(station.name);
-                              refTo.current?.blur();
-                              closeAllMenus();
-                            }}
-                            key={index}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            {station.name}
-                            {station.popular && (
-                              <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
-                                Phổ biến
-                              </span>
-                            )}
-                          </li>
-                        ))}
+                        {stations
+                          .filter((station) => station.name !== from)
+                          .map((station, index) => (
+                            <li
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setTo(station.name);
+                                refTo.current?.blur();
+                                closeAllMenus();
+                              }}
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              {station.name}
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   )}
@@ -245,7 +230,7 @@ export default function SearchForm() {
                     <Label
                       htmlFor="date"
                       className="block font-medium text-gray-700 absolute text-sm ml-4 mt-2 z-10">
-                      Ngày khởi hành
+                      Ngày đi
                     </Label>
                     <Button
                       variant={"ghost"}
@@ -353,6 +338,6 @@ export default function SearchForm() {
           </Button>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

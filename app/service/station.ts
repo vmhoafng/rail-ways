@@ -1,6 +1,6 @@
 import { ENDPOINTS } from "@/constants/endpoint";
 import { getPublic } from "@/lib/api";
 
-export const getTrains = () => {
-  return getPublic<any>(ENDPOINTS.TRAIN.LIST);
+export const getStation = () => {
+  return getPublic<any>(ENDPOINTS.STATION.LIST);
 };

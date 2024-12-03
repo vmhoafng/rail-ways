@@ -7,8 +7,8 @@ import { Clock, Train, ChevronRight } from "lucide-react";
 import Seats from "./Seats";
 import { useActiveTrainContext } from "../context/ActiveTrainContext";
 import { useSeatsContext } from "../context/SeatsContext";
-import Link from "next/link";
-import ContactInfo from "./ContactInfo";
+import { useJourneyContext } from "../context/JourneyContext";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface TrainOptionProps {
   trainId: string;
@@ -18,6 +18,8 @@ interface TrainOptionProps {
   price: number;
   trainType: string;
   availableSeats: string[];
+  journeyType: "outbound" | "return";
+  setActiveTab: (value: "outbound" | "return") => void;
 }
 
 export default function TrainOptionCard({
@@ -28,10 +30,26 @@ export default function TrainOptionCard({
   price,
   trainType,
   availableSeats,
+  journeyType,
+  setActiveTab,
 }: TrainOptionProps) {
+  const router = useRouter();
   const { activeState, setActiveState } = useActiveTrainContext();
   const { updateTrain, getTrainInfo } = useSeatsContext();
+  const {
+    setOutboundTrainId,
+    setReturnTrainId,
+    outboundTrainId,
+    returnTrainId,
+    handleChooseChange,
+  } = useJourneyContext();
+
   const isActive = activeState.trainId === trainId;
+  const isSelected =
+    journeyType === "outbound"
+      ? outboundTrainId === trainId
+      : returnTrainId === trainId;
+
   const updateTrainInfo = useCallback(() => {
     const existingTrainInfo = getTrainInfo(trainId);
     if (
@@ -78,9 +96,36 @@ export default function TrainOptionCard({
       setActiveState({ trainId, activeTab: tabValue });
     }
   };
+  const searchParams = useSearchParams();
+  const trip = searchParams.get("trip")?.trim().toLowerCase() as
+    | "one-way"
+    | "round-trip";
+  const handleSelectTrain = () => {
+    if (trip === "one-way") router.push(`/booking?${trainId}`);
+    if (trip === "round-trip") {
+      if (journeyType === "outbound") {
+        handleChooseChange(trainId);
+        setActiveTab("return");
+      }
+      if (journeyType === "return") {
+        setReturnTrainId(trainId);
+        setActiveTab("outbound");
+      }
+    }
+  };
 
+  useEffect(() => {
+    if (outboundTrainId && returnTrainId) {
+      router.push(
+        `/booking?outbound=${outboundTrainId}&return=${returnTrainId}`
+      );
+    }
+  }, [outboundTrainId, returnTrainId]);
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-orange-200">
+    <div
+      className={`bg-white rounded-lg shadow-md overflow-hidden border ${
+        isSelected ? "border-orange-500" : "border-orange-200"
+      }`}>
       <div className="p-4">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-2">
@@ -140,17 +185,19 @@ export default function TrainOptionCard({
             )}
           </TabsContent>
           <TabsContent value="itinerary">
-            {isActive && activeState.activeTab === "itinerary"}
+            {isActive && activeState.activeTab === "itinerary" && (
+              <p>Nội dung lịch trình</p>
+            )}
           </TabsContent>
           <TabsContent value="amenities">
-            {isActive &&
-              activeState.activeTab === "amenities" &&
-              "Nội dung tiện ích"}
+            {isActive && activeState.activeTab === "amenities" && (
+              <p>Nội dung tiện ích</p>
+            )}
           </TabsContent>
           <TabsContent value="policy">
-            {isActive &&
-              activeState.activeTab === "policy" &&
-              "Nội dung chính sách"}
+            {isActive && activeState.activeTab === "policy" && (
+              <p>Nội dung chính sách</p>
+            )}
           </TabsContent>
         </Tabs>
       </div>
@@ -158,11 +205,18 @@ export default function TrainOptionCard({
         <span className="text-2xl font-bold text-orange-500">
           {price.toLocaleString()}¥
         </span>
-        <Link href={`/booking/${trainId}`}>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-md">
-            Chọn chuyến
-          </Button>
-        </Link>
+        <Button
+          type="button"
+          onClick={() => {
+            handleSelectTrain();
+          }}
+          className={`font-medium px-6 py-2 rounded-md ${
+            isSelected
+              ? "bg-green-500 hover:bg-green-600 text-white"
+              : "bg-orange-500 hover:bg-orange-600 text-white"
+          }`}>
+          {isSelected ? "Đã chọn" : "Chọn chuyến"}
+        </Button>
       </div>
     </div>
   );

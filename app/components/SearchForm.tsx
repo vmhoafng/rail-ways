@@ -15,48 +15,76 @@ import {
 import { ArrowRightLeft } from "lucide-react";
 import React, { useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
-import { getSchedule } from "../service/schedule";
-interface StationsProps {
-  id: string;
-  name: string;
-  address: boolean;
-}
-export default function SearchForm({
-  stations,
-}: {
-  stations: StationsProps[];
-}) {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+import { useRouter, useSearchParams } from "next/navigation";
+import { useStations } from "../context/StationsContext";
+
+export default function SearchForm() {
+  const { stations } = useStations();
+  console.log(stations);
+  
+  const searchParams = useSearchParams();
+  const [from, setFrom] = useState(searchParams.get("departureStation") || "");
+  const [to, setTo] = useState(searchParams.get("arrivalStation") || "");
   const { openMenus, toggleMenu, closeAllMenus } = useDropdownMenu();
-  const [date, setDate] = React.useState<Date | undefined>(
-    new Date(Date.now())
+  const [date, setDate] = React.useState<Date | any>(
+    new Date(+searchParams.get("departureTime")! || Date.now())
   );
-  const [returnDate, setReturnDate] = React.useState<Date | undefined>(
-    new Date(Date.now())
+  const [returnDate, setReturnDate] = React.useState<Date | any>(
+    new Date(+searchParams.get("arrivivalTime")! || Date.now())
   );
   const ValiDate = (day: Date) =>
     isBefore(day, startOfToday()) || (date ? isBefore(day, date) : false);
   const refFrom = useRef<HTMLInputElement>(null);
   const refTo = useRef<HTMLInputElement>(null);
-  const [trip, setTrip] = useState<"one-way" | "round-trip">("one-way");
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const router = useRouter();
+  const [trip, setTrip] = useState<"one-way" | "round-trip">(
+    (searchParams.get("trip")?.trim().toLowerCase() as
+      | "one-way"
+      | "round-trip") || "one-way"
+  );
+
+  const handleSubmit = () => {
     if (trip === "one-way") {
       const formData = {
-        departureStationId: from,
-        arrivalStationId: to,
+        departureStation: from,
+        arrivalStation: to,
         departureTime: date && date.getTime(),
       };
-      console.log(await getSchedule(formData));
+      router.push(
+        `/search?departureStation=${encodeURIComponent(
+          formData.departureStation
+        )}&arrivalStation=${encodeURIComponent(
+          formData.arrivalStation
+        )}&trip=${encodeURIComponent("one-way")}
+        &departureTime=${encodeURIComponent(formData.departureTime)}`
+      );
+      try {
+        // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
+      } catch (error) {
+        console.error("Failed to fetch schedule:", error);
+      }
     }
     if (trip === "round-trip") {
       const formData = {
-        departureStationId: from,
-        arrivalStationId: to,
+        departureStation: from,
+        arrivalStation: to,
         departureTime: date && date.getTime(),
+        arrivivalTime: returnDate && returnDate.getTime(),
       };
-      console.log(getSchedule(formData));
+      try {
+        // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
+        router.push(
+          `/search?departureStation=${encodeURIComponent(
+            formData.departureStation
+          )}&arrivalStation=${encodeURIComponent(
+            formData.arrivalStation
+          )}&trip=${encodeURIComponent("round-trip")}
+          &departureTime=${encodeURIComponent(formData.departureTime)}
+          &arrivivalTime=${encodeURIComponent(formData.arrivivalTime)}`
+        );
+      } catch (error) {
+        console.error("Failed to fetch schedule:", error);
+      }
     }
     // Tạo object chứa dữ liệu form
 
@@ -64,9 +92,7 @@ export default function SearchForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full bg-white shadow-lg rounded-lg">
+    <div className="w-full bg-white shadow-lg rounded-lg">
       <div className="p-5 rounded-b-md">
         <RadioGroup
           onValueChange={(value) => setTrip(value as "one-way" | "round-trip")}
@@ -141,22 +167,35 @@ export default function SearchForm({
                         Ga khởi hành
                       </h3>
                       <ul className="space-y-3">
-                        {stations
-                          .filter((station) => station.name !== to)
-                          .map((station, index) => (
-                            <li
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setFrom(station.name);
-                                refFrom.current?.blur();
-                                closeAllMenus();
-                              }}
-                              key={index}
-                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                              {station.name}
-                            </li>
-                          ))}
+                        {stations ? (
+                          stations
+                            .filter((station) => station.name !== to)
+                            .map((station, index) => (
+                              <li
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setFrom(station.name);
+                                  refFrom.current?.blur();
+                                  closeAllMenus();
+                                }}
+                                key={index}
+                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                                {station.name}
+                              </li>
+                            ))
+                        ) : (
+                          <li
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              refFrom.current?.blur();
+                              closeAllMenus();
+                            }}
+                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                            Không tải được dữ liệu
+                          </li>
+                        )}
                       </ul>
                     </div>
                   )}
@@ -199,22 +238,35 @@ export default function SearchForm({
                         Ga đến
                       </h3>
                       <ul className="space-y-3">
-                        {stations
-                          .filter((station) => station.name !== from)
-                          .map((station, index) => (
-                            <li
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setTo(station.name);
-                                refTo.current?.blur();
-                                closeAllMenus();
-                              }}
-                              key={index}
-                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                              {station.name}
-                            </li>
-                          ))}
+                        {stations ? (
+                          stations
+                            .filter((station) => station.name !== from)
+                            .map((station, index) => (
+                              <li
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setTo(station.name);
+                                  refTo.current?.blur();
+                                  closeAllMenus();
+                                }}
+                                key={index}
+                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                                {station.name}
+                              </li>
+                            ))
+                        ) : (
+                          <li
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              refFrom.current?.blur();
+                              closeAllMenus();
+                            }}
+                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                            Không tải được dữ liệu
+                          </li>
+                        )}
                       </ul>
                     </div>
                   )}
@@ -333,11 +385,13 @@ export default function SearchForm({
               </div>
             )}
           </div>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white h-14">
+          <Button
+            onClick={handleSubmit}
+            className="bg-orange-500 hover:bg-orange-600 text-white h-14">
             Tìm kiếm
           </Button>
         </div>
       </div>
-    </form>
+    </div>
   );
 }

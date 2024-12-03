@@ -9,13 +9,13 @@ import FAQAccordion from "@/app/components/FAQAccordion";
 import { useState } from "react";
 import { apiService } from "@/lib/apiService";
 import PageLayout from "@/app/components/layout/PageLayout";
+import { JourneyProvider } from "@/app/context/JourneyContext";
 
 const SearchLayout: React.FC<
   React.PropsWithChildren<{
     children: React.ReactNode;
-    depature: React.ReactNode;
   }>
-> = ({ children, depature }) => {
+> = ({ children }) => {
   return (
     <PageLayout header="Tìm kiếm" withSearchForm>
       {children}

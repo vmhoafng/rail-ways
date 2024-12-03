@@ -1,8 +1,8 @@
 "use client";
-import { PassengerInfo } from "../../../components/PassengerInfo";
-import { PaymentSummary } from "../../../components/PaymentSummary";
-import { Button } from "../../../components/Button";
-import { PromoCodeInput } from "../../../components/PromoCodeInput";
+import { PassengerInfo } from "../../components/PassengerInfo";
+import { PaymentSummary } from "../../components/PaymentSummary";
+import { Button } from "../../components/Button";
+import { PromoCodeInput } from "../../components/PromoCodeInput";
 import { useSeatsContext } from "@/app/context/SeatsContext";
 import Seats from "@/app/components/Seats";
 import { useRouter } from "next/router";

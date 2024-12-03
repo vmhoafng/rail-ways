@@ -15,7 +15,7 @@ export const ENDPOINTS = {
     DETAIL: `/train/${PARAMS.SEARCH}`,
   },
   SCHEDULE: {
-    GET_BY_INFO: "schedule/anonymous/get-by-departure-and-arrival",
+    GET_BY_INFO: "schedule/anonymous/get-by-departure-and-arrival-name",
   },
   STATION: {
     LIST: "/station/anonymous/get-all",

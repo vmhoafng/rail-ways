@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useJourneyContext } from "../context/JourneyContext";
 
 interface JourneyTabsProps {
   activeTab: "outbound" | "return";
@@ -10,8 +11,8 @@ interface JourneyTabsProps {
 export default function JourneyTabs({
   activeTab,
   onTabChange,
-  outboundDate = "THỨ 3, 05/11",
-  returnDate = "THỨ 6, 08/11",
+  outboundDate,
+  returnDate,
 }: JourneyTabsProps) {
   return (
     <div className="flex w-full border-b">

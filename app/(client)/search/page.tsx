@@ -1,10 +1,11 @@
-import { getTrains } from "@/app/service/train";
 import React from "react";
 import TrainSearchPage from "./component/TrainSearchPage";
 
 const page = async () => {
-  const { result } = await getTrains();
-  return <TrainSearchPage trains={result} />;
+  const trains = null;
+  return (
+      <TrainSearchPage trains={trains} />
+  );
 };
 
 export default page;

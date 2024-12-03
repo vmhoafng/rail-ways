@@ -3,6 +3,8 @@ import { Footer } from "./components/layout/Footer";
 import "./globals.css";
 import { SeatsProvider } from "./context/SeatsContext";
 import { Montserrat } from "next/font/google";
+import { StationsProvider } from "./context/StationsContext";
+import { JourneyProvider } from "./context/JourneyContext";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -15,16 +17,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SeatsProvider>
-      <html lang="en">
-        <body className={montserrat.className}>
-          <div className="bg-slate-100 flex flex-col">
-            <Header />
-            <main className="flex-grow ">{children}</main>
-            <Footer />
-          </div>
-        </body>
-      </html>
-    </SeatsProvider>
+    <JourneyProvider>
+      <SeatsProvider>
+        <StationsProvider>
+          <html lang="en">
+            <body className={montserrat.className}>
+              <div className="bg-slate-100 flex flex-col">
+                <Header />
+                <main className="flex-grow ">{children}</main>
+                <Footer />
+              </div>
+            </body>
+          </html>
+        </StationsProvider>
+      </SeatsProvider>
+    </JourneyProvider>
   );
 }

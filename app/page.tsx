@@ -1,7 +1,5 @@
 import SearchForm from "./components/SearchForm";
 import FAQAccordion from "./components/FAQAccordion";
-import { StationsService } from "@/services/api/stationsService";
-import { useStations } from "./context/StationsContext";
 
 export default function HomePage() {
   

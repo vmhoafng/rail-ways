@@ -1,6 +1,11 @@
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 import "./globals.css";
+import useDropdownMenu from "./hooks/useDropDown";
+import AppProvider from "./AppProvider";
+import { cookies } from "next/headers";
+import { Toaster } from "@/components/ui/toaster";
+import { UserProvider } from "@/contexts/UserContext";
 import { SeatsProvider } from "./context/SeatsContext";
 import { Montserrat } from "next/font/google";
 import { StationsProvider } from "./context/StationsContext";
@@ -10,24 +15,27 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], // You can customize the weights as needed
 });
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <JourneyProvider>
       <SeatsProvider>
         <StationsProvider>
           <html lang="en">
             <body className={montserrat.className}>
-              <div className="bg-slate-100 flex flex-col">
-                <Header />
-                <main className="flex-grow ">{children}</main>
-                <Footer />
-              </div>
-            </body>
+              <UserProvider>
+          <div className="bg-slate-100 flex flex-col">
+                  <Header />
+                  <main className="flex-grow">{children}</main>
+                  <Toaster />
+            <Footer />
+                </div>
+              </UserProvider>
+      </body>
           </html>
         </StationsProvider>
       </SeatsProvider>

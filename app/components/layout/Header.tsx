@@ -1,7 +1,14 @@
+'use client'
 import Link from "next/link";
+import { FaUser } from "react-icons/fa";
+import ClientOnlyButtonLogout from "./ClientOnlyButtonLogout";
+import { useUser } from "@/contexts/UserContext";
 
 export function Header() {
-  const { name } = { name: "cost" };
+  const { isLoggedIn, profile } = useUser();
+  console.log("Header isLoggedIn", isLoggedIn);
+  console.log("Header profile", profile);
+
   return (
     <header className="bg-white shadow-md">
       <div className="container-custom mx-auto px-4 py-4 flex justify-between items-center">
@@ -9,7 +16,7 @@ export function Header() {
           klook
         </Link>
         <nav>
-          <ul className="flex space-x-4">
+          <ul className="flex items-center justify-center gap-4">
             <li>
               <Link href="/" className="text-gray-600 hover:text-gray-900">
                 Trang chủ
@@ -24,37 +31,26 @@ export function Header() {
             </li>
             <li>
               <Link
-                href="/booking-information"
-                className="text-gray-600 hover:text-gray-900">
-                Tìm vé
-              </Link>
-            </li>
-            <li>
-              <Link
                 href="/booking"
                 className="text-gray-600 hover:text-gray-900">
                 Đặt vé
               </Link>
             </li>
-            <li className="text-gray-600 flex gap-1">
-              <Link
-                href="/booking"
-                className="text-gray-600 hover:text-gray-900">
-                Đăng ký
-              </Link>
-              /
-              <Link
-                href="/booking"
-                className="text-gray-600 hover:text-gray-900">
-                Đăng nhập
-              </Link>
+            <li>
+
+              {isLoggedIn && profile ? (
+                <Link href="/auth/Profile" className="text-gray-600">Xin chào, {profile.firstName}!</Link>
+              ) : (
+                <Link
+                  href="/auth"
+                  className="text-gray-600 hover:text-gray-900 ">
+                  <FaUser size={"22px"} className="" />
+                </Link>
+              )}
+
             </li>
             <li>
-              <Link
-                href="/profile"
-                className="text-gray-600 hover:text-gray-900">
-                {name}
-              </Link>
+              <ClientOnlyButtonLogout />
             </li>
           </ul>
         </nav>

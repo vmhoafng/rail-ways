@@ -209,6 +209,7 @@ const request = async <Response>(
 const http = {
   get<Response>(
     url: string,
+    body?: any,
     options?: Omit<CustomOptions, "body"> | undefined
   ) {
     return request<Response>("GET", url, options);

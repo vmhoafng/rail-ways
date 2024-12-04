@@ -28,8 +28,7 @@ export default function SearchForm() {
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const station = await searchApiRequest.search.getAll();
-        console.log(station.payload);
+        const station = await searchApiRequest.search.getAllStations();
         setStations(station.payload.result);
         setLoading(false);
       } catch (error) {
@@ -49,7 +48,7 @@ export default function SearchForm() {
     new Date(+searchParams.get("departureTime")! || Date.now())
   );
   const [returnDate, setReturnDate] = React.useState<Date | any>(
-    new Date(+searchParams.get("arrivivalTime")! || Date.now())
+    new Date(+searchParams.get("arrivalTime")! || Date.now())
   );
   const ValiDate = (day: Date) =>
     isBefore(day, startOfToday()) || (date ? isBefore(day, date) : false);
@@ -88,7 +87,7 @@ export default function SearchForm() {
         departureStation: from,
         arrivalStation: to,
         departureTime: date && date.getTime(),
-        arrivivalTime: returnDate && returnDate.getTime(),
+        arrivalTime: returnDate && returnDate.getTime(),
       };
       try {
         // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
@@ -99,7 +98,7 @@ export default function SearchForm() {
             formData.arrivalStation
           )}&trip=${encodeURIComponent("round-trip")}
           &departureTime=${encodeURIComponent(formData.departureTime)}
-          &arrivivalTime=${encodeURIComponent(formData.arrivivalTime)}`
+          &arrivalTime=${encodeURIComponent(formData.arrivalTime)}`
         );
       } catch (error) {
         console.error("Failed to fetch schedule:", error);

@@ -1,49 +1,48 @@
-import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+let ws: WebSocket | null = null;
 
-const socket = new SockJS(
-  `${process.env.NEXT_PUBLIC_SERVER_URL}/websocket/auth`
-);
-
-export const stompClient = new Client({
-  webSocketFactory: () => socket,
-  reconnectDelay: 5000,
-  debug: (str) => console.log(str),
-  onConnect: () => {
-    console.log("WebSocket connected.");
-  },
-  onDisconnect: () => {
-    console.log("WebSocket disconnected.");
-  },
-  onStompError: (frame) => {
-    console.error("Broker error: " + frame.headers["message"]);
-    console.error("Details: " + frame.body);
-  },
-});
-
-export const connectWebSocket = () => {
-  if (!stompClient.connected) {
-    stompClient.activate();
-  }
-};
-
-export const disconnectWebSocket = () => {
-  if (stompClient.connected) {
-    stompClient.deactivate();
-  }
-};
-
-export const subscribeToTopic = (
-  topic: string,
-  callback: (message: any) => void
+export const activateWebSocket = (
+  accessToken: string,
+  onLogout: () => void
 ) => {
-  if (!stompClient.connected) {
-    console.error("WebSocket is not connected. Subscription failed.");
+  if (ws) {
+    console.warn("WebSocket is already connected.");
     return;
   }
 
-  stompClient.subscribe(topic, (message) => {
-    const payload = JSON.parse(message.body);
-    callback(payload);
-  });
+  ws = new WebSocket(
+    `${process.env.NEXT_PUBLIC_WS_URL}/websocket/auth?token=${accessToken}`
+  );
+
+  ws.onopen = () => {
+    console.log("WebSocket connected");
+  };
+
+  ws.onmessage = (event) => {
+    console.log("Received message:", event);
+
+    const message = event.data;
+    console.log("Message received:", message);
+
+    if (message === "logout") {
+      console.log("Received logout message.");
+      onLogout();
+    }
+  };
+
+  ws.onclose = () => {
+    console.log("WebSocket disconnected");
+    ws = null;
+  };
+
+  ws.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+};
+
+export const deactivateWebSocket = () => {
+  if (ws) {
+    ws.close();
+    ws = null;
+    console.log("WebSocket deactivated");
+  }
 };

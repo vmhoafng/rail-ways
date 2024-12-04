@@ -12,12 +12,9 @@ export const StationsService = {
   getStations: async () => {
     try {
       const res = await axiosClient.get(ENDPOINTS.STATION.LIST);
-      console.log(res);
-      
+
       return res.data;
     } catch (error) {
-      console.log();
-      
       throw error;
     }
   },

@@ -13,6 +13,7 @@ import {
 import { useSearchParams } from "next/navigation";
 import { vi } from "date-fns/locale";
 import { format } from "date-fns";
+import searchApiRequest from "@/app/apiRequests/search";
 interface TrainJourney {
   id: string;
   departureStationName: string;
@@ -38,11 +39,33 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
   const [timePicked, setTimePicked] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const { returnTrainId, outboundTrainId } = useJourneyContext();
-
+  const [Journey, setJourney] = useState<[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const departureStation = searchParams.get("departureStation")!;
+  const arrivalStation = searchParams.get("arrivalStation")!;
+  const arrivalTime = searchParams.get("arrivalTime")!;
+  const departureTime = searchParams.get("departureTime")!;
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const journey: any = await searchApiRequest.search.getScheduleByInfos({ departureStation, arrivalStation });
+        //y la get k lay body dc ne doi ti
+        //tren swwageer co ma
+        
+        console.log(journey.payload);
+        setJourney(journey.payload.result);
+        setLoading(false);
+      } catch (error) {
+        setError("Failed to fetch train data");
+        setLoading(false);
+      }
+    };
+    fetchStations();
+  }, []);
   // Effect to manage tab switching based on selected train IDs
   useEffect(() => {
-    console.log(outboundTrainId);
-
     if (!outboundTrainId) setActiveTab("outbound");
     else if (!returnTrainId) setActiveTab("return");
   }, [outboundTrainId, returnTrainId]);
@@ -54,14 +77,12 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
         : [...prevTimes, time]
     );
   };
-  const searchParams = useSearchParams();
+
   const outboundDate = new Date(+searchParams.get("departureTime")!);
-  const returnDate = new Date(+searchParams.get("arrivivalTime")!);
+  const returnDate = new Date(+searchParams.get("arrivalTime")!);
   const trip = searchParams.get("trip")?.trim().toLowerCase() as
     | "one-way"
     | "round-trip";
-  console.log(new Date(+searchParams.get("arrivivalTime")!));
-
   return (
     <JourneyProvider>
       <ActiveTrainProvider>

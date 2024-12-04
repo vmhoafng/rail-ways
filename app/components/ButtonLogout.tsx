@@ -1,37 +1,43 @@
-// components/ButtonLogout.tsx
-"use client";
-
 import { useUser } from "@/contexts/UserContext";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import authApiRequest from "@/app/apiRequests/auth";
 import { Button } from "@/components/ui/button";
 import { clientAccessToken } from "@/lib/http";
 
 export default function ButtonLogout() {
-    const { isLoggedIn, setLoggedIn } = useUser();
+    const { isLoggedIn, setLoggedIn, setProfile, setAccessToken } = useUser();
     const router = useRouter();
+
     const handleLogout = async () => {
         try {
-            // Gọi API đăng xuất
+            // Lấy access token từ localStorage
             const accessToken = localStorage.getItem("accessToken");
-            await authApiRequest.logout.logout(accessToken);
-            console.log("Logged out successfully.");
+            console.log("accessToken", accessToken);
+            if (accessToken) {
+                // Gọi API đăng xuất nếu cần
+                await authApiRequest.logout.logout(accessToken);
+                console.log("Logged out successfully.");
+            }
 
-
+            // Xóa tất cả thông tin liên quan đến đăng nhập
             localStorage.removeItem("accessToken");
             localStorage.removeItem("accessTokenExpiry");
-            // Cập nhật trạng thái và chuyển hướng
+            setAccessToken(null);
+            setProfile(null);
+
+            // Đặt trạng thái không đăng nhập
             setLoggedIn(false);
-            router.push("/auth"); // Quay lại trang đăng nhập
+
+            // Chuyển hướng về trang đăng nhập
+            router.push("/auth");
         } catch (error) {
             console.error("Error logging out:", error);
+        } finally {
+            // Đảm bảo làm mới trạng thái và xóa token client
+            setLoggedIn(false);
+            clientAccessToken.value = "";
+            router.refresh();
         }
-        finally {
-            setLoggedIn(false)
-            router.refresh()
-            clientAccessToken.value = ""
-        }
-
     };
 
     if (!isLoggedIn) {

@@ -1,27 +1,30 @@
 "use client"
 import authApiRequest from "@/app/apiRequests/auth";
+import { useUser } from "@/contexts/UserContext";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const GoogleLogin: React.FC = () => {
     const [isLoading, setLoading] = useState(false);
-    const router = useRouter();
+
     async function handleGoogleLogin() {
+        if (isLoading) return; // Prevent multiple submissions
         try {
             // Gửi yêu cầu tới API để lấy URL Google OAuth
             const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/auth/anonymous/oauth2/login`,
                 {
-                    method: 'GET'
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                 });
-
+            console.log(response);
             if (!response.ok) {
                 throw new Error('Failed to fetch Google login URL');
             }
-
-            // URL Google OAuth được trả về dưới dạng plain text
             const googleLoginUrl = await response.text();
 
-            // Redirect người dùng đến Google OAuth URL
             window.location.href = googleLoginUrl;
 
         } catch (error) {

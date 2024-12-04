@@ -19,19 +19,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStations } from "../context/StationsContext";
 import { apiService } from "../../lib/apiService";
 import searchApiRequest from "../apiRequests/search";
+import { Station } from "../interfaces";
 
 export default function SearchForm() {
-  const data = apiService.getStation();
-  console.log(data);
-
-  const [stations, setStations] = useState<any[]>([]);
+  const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const res = searchApiRequest.search.getAll();
-        setStations(res as any);
+        const station = await searchApiRequest.search.getAll();
+        console.log(station.payload);
+        setStations(station.payload.result);
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch train data");
@@ -140,8 +139,8 @@ export default function SearchForm() {
             <Label htmlFor="round-trip" className="flex gap-2 items-center">
               <span
                 className={` border-2 rounded-full -mt-0.5 ${trip === "round-trip"
-                    ? "border-orange-600"
-                    : "border-gray-200"
+                  ? "border-orange-600"
+                  : "border-gray-200"
                   }`}>
                 <span
                   className={`flex items-center border  cursor-pointer size-3 rounded-full ${trip === "round-trip" ? "bg-orange-600" : "bg-white"

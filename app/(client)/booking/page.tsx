@@ -1,26 +1,9 @@
-"use client";
-import { Button } from "../../components/Button";
-import { useSeatsContext } from "@/app/context/SeatsContext";
-import Seats from "@/app/components/Seats";
-import { useRouter } from "next/router";
+import BookingForm from './pages/BookingForm'
 
-interface BookingPageProps {
-  params: { id: string };
-}
-export default function BookingPage({ params }: BookingPageProps) {
-  const { id } = params;
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold mb-6">Loại vé</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <Seats trainId={id} />
+export default function BookingPage() {
+    return (
+        <div className="container-custom mx-auto py-8">
+            <BookingForm />
         </div>
-        <div>
-          <Button className="w-full mt-6">Xác nhận</Button>
-        </div>
-      </div>
-    </div>
-  );
+    )
 }

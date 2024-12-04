@@ -13,15 +13,42 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ArrowRightLeft } from "lucide-react";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStations } from "../context/StationsContext";
+import { apiService } from "../../lib/apiService";
 
 export default function SearchForm() {
-  const { stations } = useStations();
-  console.log(stations);
+  const data = apiService.getStation();
+  console.log(data);
   
+  const [stations, setStations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await fetch(
+          "https://5029-113-22-113-75.ngrok-free.app/api/v1/station/anonymous/get-all"
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        console.log(data);
+
+        setStations(data);
+        setLoading(false);
+      } catch (error) {
+        setError("Failed to fetch train data");
+        setLoading(false);
+      }
+    };
+
+    fetchStations();
+  }, []);
+
   const searchParams = useSearchParams();
   const [from, setFrom] = useState(searchParams.get("departureStation") || "");
   const [to, setTo] = useState(searchParams.get("arrivalStation") || "");

@@ -18,27 +18,20 @@ import useDropdownMenu from "../hooks/useDropDown";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStations } from "../context/StationsContext";
 import { apiService } from "../../lib/apiService";
+import searchApiRequest from "../apiRequests/search";
 
 export default function SearchForm() {
   const data = apiService.getStation();
   console.log(data);
-  
+
   const [stations, setStations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const response = await fetch(
-          "https://5029-113-22-113-75.ngrok-free.app/api/v1/station/anonymous/get-all"
-        );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        console.log(data);
-
-        setStations(data);
+        const res = searchApiRequest.search.getAll();
+        setStations(res as any);
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch train data");
@@ -129,13 +122,11 @@ export default function SearchForm() {
             <RadioGroupItem value="one-way" id="one-way" className="hidden" />
             <Label htmlFor="one-way" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${
-                  trip === "one-way" ? "border-orange-600" : "border-gray-200"
-                }`}>
+                className={` border-2 rounded-full -mt-0.5 ${trip === "one-way" ? "border-orange-600" : "border-gray-200"
+                  }`}>
                 <span
-                  className={`flex items-center border cursor-pointer size-3 rounded-full ${
-                    trip === "one-way" ? "bg-orange-600" : "bg-white"
-                  }`}></span>
+                  className={`flex items-center border cursor-pointer size-3 rounded-full ${trip === "one-way" ? "bg-orange-600" : "bg-white"
+                    }`}></span>
               </span>
               Một chiều
             </Label>
@@ -148,15 +139,13 @@ export default function SearchForm() {
             />
             <Label htmlFor="round-trip" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${
-                  trip === "round-trip"
+                className={` border-2 rounded-full -mt-0.5 ${trip === "round-trip"
                     ? "border-orange-600"
                     : "border-gray-200"
-                }`}>
+                  }`}>
                 <span
-                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${
-                    trip === "round-trip" ? "bg-orange-600" : "bg-white"
-                  }`}></span>
+                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${trip === "round-trip" ? "bg-orange-600" : "bg-white"
+                    }`}></span>
               </span>
               Khứ hồi
             </Label>

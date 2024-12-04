@@ -132,3 +132,17 @@ export interface AuthProfileResponse {
     };
   };
 }
+export interface getAllResponse {
+  message: string;
+  result: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string | null;
+    address?: string | null;
+    createdDate: string;
+    roleName: string[];
+  }[];
+  status: number;
+}

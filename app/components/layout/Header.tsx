@@ -1,7 +1,7 @@
 'use client'
 import Link from "next/link";
 import { FaUser } from "react-icons/fa";
-import ClientOnlyButtonLogout from "./ClientOnlyButtonLogout";
+import ClientOnlyButtonLogout from "../ClientOnlyButtonLogout";
 import { useUser } from "@/contexts/UserContext";
 
 export function Header() {

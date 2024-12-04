@@ -20,7 +20,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <JourneyProvider>
       <SeatsProvider>
@@ -28,14 +27,14 @@ export default function RootLayout({
           <html lang="en">
             <body className={montserrat.className}>
               <UserProvider>
-          <div className="bg-slate-100 flex flex-col">
+                <div className="bg-slate-100 flex flex-col">
                   <Header />
                   <main className="flex-grow">{children}</main>
                   <Toaster />
-            <Footer />
+                  <Footer />
                 </div>
               </UserProvider>
-      </body>
+            </body>
           </html>
         </StationsProvider>
       </SeatsProvider>

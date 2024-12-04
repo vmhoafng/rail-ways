@@ -5,7 +5,7 @@ import { AuthForms } from "./AuthForm"
 
 export function AuthLayout() {
     return (
-        <div className="container-custom flex items-center justify-center p-4">
+        <div className="container-custom flex items-start justify-center p-4 mx-auto">
             <Card className="w-full grid md:grid-cols-2 gap-6 p-6 ">
                 <BrandSection />
                 <AuthForms />

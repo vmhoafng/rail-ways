@@ -11,7 +11,7 @@ const TripInfo: React.FC<TripInfoProps> = ({ departure, arrival }) => {
     return (
         <div className="space-y-4">
             <div>
-                <Label>Điểm đón</Label>
+                <Label>Ga đi</Label>
                 <Select>
                     <SelectTrigger>
                         <SelectValue placeholder={departure} />
@@ -22,7 +22,7 @@ const TripInfo: React.FC<TripInfoProps> = ({ departure, arrival }) => {
                 </Select>
             </div>
             <div>
-                <Label>Điểm trả</Label>
+                <Label>Ga đến</Label>
                 <Select>
                     <SelectTrigger>
                         <SelectValue placeholder={arrival} />

@@ -33,10 +33,6 @@ const CustomerInfo: React.FC<CustomerInfoProps> = ({ onInfoChange }) => {
                     <Label htmlFor="email">Email *</Label>
                     <Input id="email" placeholder="chuonglever@gmail.com" onChange={(e) => onInfoChange('email', e.target.value)} />
                 </div>
-                <div className='flex items-center justify-center gap-4 '>
-                    <InputOTPPattern />
-                    <Button className='bg-orange-600 hover:bg-orange-500'>Xác thực</Button>
-                </div>
             </div>
             <div className="flex items-center space-x-2">
                 <Checkbox id="terms" />

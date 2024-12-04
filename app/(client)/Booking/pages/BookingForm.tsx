@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import SeatMap from './SeatMap'
-import CustomerInfo from './CustomerInfo'
-import TripInfo from './TripInfo'
-import PriceSummary from './PriceSummary'
-import TripInfoCard from './TripInfoCard'
-import PriceDetailsCard from './PriceDetailsCard'
+import SeatMap from '../components/SeatMap'
+import CustomerInfo from '../components/CustomerInfo'
+import TripInfo from '../components/TripInfo'
+import PriceSummary from '../components/PriceSummary'
+import TripInfoCard from '../components/TripInfoCard'
+import PriceDetailsCard from '../components/PriceDetailsCard'
 import { cn } from "@/lib/utils"
+import Link from 'next/link'
 
 
 export default function BookingForm() {
@@ -53,13 +54,13 @@ export default function BookingForm() {
                         <CardContent className="space-y-6">
                             <SeatMap onSeatSelect={handleSeatSelect} />
                             <CustomerInfo onInfoChange={handleInfoChange} />
-                            <TripInfo departure="Bến xe An Sương" arrival="Đà Lạt" />
+                            <TripInfo departure="Sài Gòn" arrival="Hà Nội" />
                             <PriceSummary price={price} />
                         </CardContent>
                         <CardFooter className="flex justify-between">
                             <Button variant="outline">Hủy</Button>
                             <Button className='bg-orange-600 hover:bg-orange-500' onClick={handleSubmit}>
-                                Thanh toán
+                                <Link href="/Payment">Thanh Toán</Link>
                             </Button>
                         </CardFooter>
                     </Card>
@@ -67,7 +68,7 @@ export default function BookingForm() {
 
                 <div className="grid grid-cols-1 grid-rows-2 gap-6">
                     <TripInfoCard
-                        route="An Suong - Da Lat"
+                        route="Sai Gon - Ha Noi"
                         departureTime="00:02 01/11/2024"
                         seatCount={selectedSeat ? 1 : 0}
                         dropOffPoint="Đà Lạt"

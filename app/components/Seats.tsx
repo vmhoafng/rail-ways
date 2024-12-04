@@ -15,10 +15,10 @@ const Seat: React.FC<SeatProps> = ({ number, status, onSelect }) => (
     className={cn(
       "size-10 m-0.5 sm:m-1 text-xs sm:text-sm font-semibold rounded-t-lg border-2",
       status === "available" &&
-        "bg-white text-blue-600 border-blue-600 hover:bg-blue-100",
+      "bg-white text-blue-600 border-blue-600 hover:bg-blue-100",
       status === "selected" && "bg-blue-600 text-white border-blue-800",
       status === "unavailable" &&
-        "bg-orange-500 text-white border-orange-700 cursor-not-allowed"
+      "bg-orange-500 text-white border-orange-700 cursor-not-allowed"
     )}
     onClick={() => status !== "unavailable" && onSelect(number)}
     disabled={status === "unavailable"}>

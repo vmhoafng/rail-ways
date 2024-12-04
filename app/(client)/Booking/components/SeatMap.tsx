@@ -11,4 +11,4 @@ const SeatMap: React.FC<SeatMapProps> = ({ onSeatSelect }) => {
     )
 }
 
-export default SeatMap
+export default SeatMap  

@@ -19,6 +19,7 @@ import {
 import AddScheduleDialog from "./components/AddScheduleDialog";
 import MobileNav from "./components/MobileNav";
 import TabContent from "./components/TabContent";
+import { useRouter } from "next/navigation";
 
 export interface TabContentItem {
   title: string;

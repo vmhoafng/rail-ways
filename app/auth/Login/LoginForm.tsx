@@ -82,6 +82,7 @@ export function LoginForm() {
             } else {
                 // Có thêm các role khác, điều hướng về trang admin kèm theo roles
                 const rolesQuery = encodeURIComponent(roles.join(","));
+
                 router.push(`/admin?roles=${rolesQuery}`);
             }
         } catch (error) {

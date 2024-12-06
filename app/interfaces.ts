@@ -133,18 +133,42 @@ export interface AuthProfileResponse {
   };
 }
 
-export interface Station {
+// Interface cho một chỗ ngồi (Seat)
+export interface Seat {
   id: number;
-  name: string;
-  address: string;
+  seatNumber: string;
+  isAvailable: boolean;
 }
-[];
 
-export interface getAllResponse {
+// Interface cho toa tàu (Railcar)
+export interface Railcar {
+  railcarName: string;
+  totalSeat: number;
+  totalSeatAvailable: number;
+  railcarType: string;
+  seats: Seat[];
+}
+
+// Interface cho một chuyến tàu (Train)
+export interface Train {
+  id: number;
+  departureStationId: number;
+  arrivalStationId: number;
+  departureStationName: string;
+  arrivalStationName: string;
+  departureTime: string;
+  arrivalTime: string;
+  trainName: string;
+  railcars: Railcar[];
+}
+
+// Interface tổng quát cho phản hồi API
+export interface GetScheduleResponse {
   message: string[];
   status: number;
-  result: Station[];
+  result: Train[];
 }
+
 export interface createTrainBodyType {
   trainName: string;
   trainNumber: string;
@@ -232,4 +256,16 @@ export interface createRailCarResponse {
     seatPerRow: number;
     isHaveFloor: boolean;
   };
+}
+export interface Station {
+  id: number;
+  name: string;
+  address: string;
+}
+[];
+
+export interface getAllResponse {
+  message: string[];
+  status: number;
+  result: Station[];
 }

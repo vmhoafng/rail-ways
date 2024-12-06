@@ -14,6 +14,8 @@ interface UserContextType {
   accessToken: string | null;
   setAccessToken: (accessToken: string | null) => void;
   refreshToken: () => Promise<void>;
+  isAdministrator: boolean;
+  setAdministrator: (isAdmin: boolean) => void;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -22,6 +24,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [profile, setProfile] = useState<UpdateProfileBodyType | null>(null);
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [isAdministrator, setAdministrator] = useState(false);
   const { toast } = useToast();
 
   const setAccessToken = (token: string | null) => {
@@ -103,6 +106,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         accessToken,
         setAccessToken,
         refreshToken,
+        isAdministrator,
+        setAdministrator,
       }}
     >
       {children}

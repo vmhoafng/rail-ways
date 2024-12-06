@@ -20,6 +20,7 @@ import AddScheduleDialog from "./components/AddScheduleDialog";
 import MobileNav from "./components/MobileNav";
 import TabContent from "./components/TabContent";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/contexts/UserContext";
 
 export interface TabContentItem {
   title: string;
@@ -142,7 +143,7 @@ export const tabContent: TabContentType = {
 export default function AdminDashboardWithSchedule() {
   const [activeTab, setActiveTab] =
     React.useState<keyof TabContentType>("trains");
-
+  const { setAdministrator } = useUser();
   const router = useRouter();
 
   useEffect(() => {
@@ -169,7 +170,9 @@ export default function AdminDashboardWithSchedule() {
       router.push("/auth");
     }
   }, [router]);
-
+  useEffect(() => {
+    setAdministrator(true);
+  }, []);
 
   return (
     <div className="container-custom mx-auto p-4">

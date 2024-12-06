@@ -12,10 +12,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 interface TrainOptionProps {
   trainId: string;
+  departureStationName: string;
+  arrivalStationName: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;
-  price: number;
   trainType: string;
   availableSeats: string[];
   journeyType: "outbound" | "return";
@@ -24,10 +25,11 @@ interface TrainOptionProps {
 
 export default function TrainOptionCard({
   trainId,
+  departureStationName,
+  arrivalStationName,
   departureTime,
   arrivalTime,
   duration,
-  price,
   trainType,
   availableSeats,
   journeyType,
@@ -55,19 +57,21 @@ export default function TrainOptionCard({
     if (
       !existingTrainInfo ||
       existingTrainInfo.departureTime !== departureTime ||
+      existingTrainInfo.departureStationName !== departureStationName ||
+      existingTrainInfo.arrivalStationName !== arrivalStationName ||
       existingTrainInfo.arrivalTime !== arrivalTime ||
       existingTrainInfo.duration !== duration ||
-      existingTrainInfo.price !== price ||
       existingTrainInfo.trainType !== trainType ||
       JSON.stringify(existingTrainInfo.availableSeats) !==
-        JSON.stringify(availableSeats)
+      JSON.stringify(availableSeats)
     ) {
       updateTrain({
         trainId,
+        departureStationName,
+        arrivalStationName,
         departureTime,
         arrivalTime,
         duration,
-        price,
         trainType,
         availableSeats,
         selectedSeats: existingTrainInfo?.selectedSeats || [],
@@ -78,7 +82,6 @@ export default function TrainOptionCard({
     departureTime,
     arrivalTime,
     duration,
-    price,
     trainType,
     availableSeats,
     updateTrain,
@@ -101,7 +104,7 @@ export default function TrainOptionCard({
     | "one-way"
     | "round-trip";
   const handleSelectTrain = () => {
-    if (trip === "one-way") router.push(`/booking?${trainId}`);
+    if (trip === "one-way") router.push(`/Booking?outbound${trainId}&isHaveRoundTrip=${false}`);
     if (trip === "round-trip") {
       if (journeyType === "outbound") {
         handleChooseChange(trainId);
@@ -123,9 +126,8 @@ export default function TrainOptionCard({
   }, [outboundTrainId, returnTrainId]);
   return (
     <div
-      className={`bg-white rounded-lg shadow-md overflow-hidden border ${
-        isSelected ? "border-orange-500" : "border-orange-200"
-      }`}>
+      className={`bg-white rounded-lg shadow-md overflow-hidden border ${isSelected ? "border-orange-500" : "border-orange-200"
+        }`}>
       <div className="p-4">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-2">
@@ -141,9 +143,9 @@ export default function TrainOptionCard({
           </div>
         </div>
         <div className="flex justify-between items-center text-sm text-gray-700 mb-2">
-          <span>Tokyo Station</span>
+          <span>{departureStationName}</span>
           <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span>Shin-Osaka Station</span>
+          <span>{arrivalStationName}</span>
         </div>
         <div className="flex justify-between items-center text-sm mb-4">
           <div className="flex items-center">
@@ -159,22 +161,18 @@ export default function TrainOptionCard({
         <Tabs
           value={isActive ? activeState.activeTab || "" : ""}
           className="w-full">
-          <TabsList className="flex justify-between w-full items-center bg-gray-100 p-1 h-fit rounded-md">
+          <TabsList className="flex justify-center w-ful  l items-center bg-gray-100 p-1 h-fit rounded-md">
             {[
               { value: "seat", label: "Chọn ghế" },
-              { value: "itinerary", label: "Lịch trình" },
-              { value: "amenities", label: "Tiện ích" },
-              { value: "policy", label: "Chính sách" },
             ].map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
                 onClick={() => handleTabClick(tab.value)}
-                className={`text-sm py-1.5 w-1/4 ${
-                  isActive && activeState.activeTab === tab.value
-                    ? "bg-white shadow rounded-md"
-                    : "text-gray-600 hover:text-gray-800"
-                }`}>
+                className={`text-sm py-1.5 w-1/4 ${isActive && activeState.activeTab === tab.value
+                  ? "bg-white shadow rounded-md"
+                  : "text-gray-600 hover:text-gray-800"
+                  }`}>
                 {tab.label}
               </TabsTrigger>
             ))}
@@ -203,18 +201,16 @@ export default function TrainOptionCard({
       </div>
       <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center">
         <span className="text-2xl font-bold text-orange-500">
-          {price.toLocaleString()}¥
         </span>
         <Button
           type="button"
           onClick={() => {
             handleSelectTrain();
           }}
-          className={`font-medium px-6 py-2 rounded-md ${
-            isSelected
-              ? "bg-green-500 hover:bg-green-600 text-white"
-              : "bg-orange-500 hover:bg-orange-600 text-white"
-          }`}>
+          className={`font-medium px-6 py-2 rounded-md ${isSelected
+            ? "bg-green-500 hover:bg-green-600 text-white"
+            : "bg-orange-500 hover:bg-orange-600 text-white"
+            }`}>
           {isSelected ? "Đã chọn" : "Chọn chuyến"}
         </Button>
       </div>

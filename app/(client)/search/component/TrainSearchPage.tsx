@@ -12,11 +12,12 @@ import {
 } from "@/app/context/JourneyContext";
 import { useSearchParams } from "next/navigation";
 import { vi } from "date-fns/locale";
-import { format } from "date-fns";
+import { format, differenceInMinutes } from "date-fns";
 import searchApiRequest from "@/app/apiRequests/search";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+
 
 interface TrainJourney {
   id: string;
@@ -28,15 +29,15 @@ interface TrainJourney {
   seatNumbersAvailable: string[];
 }
 
-const trainJourneyData: TrainJourney = {
-  id: "SE23333",
-  departureStationName: "Ga Hà Nội",
-  arrivalStationName: "Ga Hải Phòng",
-  departureTime: "2024-10-30T10:00:00.000+00:00",
-  arrivalTime: "2024-10-30T11:30:00.000+00:00",
-  trainName: "SE23333",
-  seatNumbersAvailable: ["SE1.1", "SE1.2", "SE1.3", "SE1.4", "SE1.5"],
-};
+// const trainJourneyData: TrainJourney = {
+//   id: TrainJourney.id,
+//   departureStationName: "Ga Hà Nội",
+//   arrivalStationName: "Ga Hải Phòng",
+//   departureTime: "2024-10-30T10:00:00.000+00:00",
+//   arrivalTime: "2024-10-30T11:30:00.000+00:00",
+//   trainName: "SE23333",
+//   seatNumbersAvailable: ["SE1.1", "SE1.2", "SE1.3", "SE1.4", "SE1.5"],
+// };
 
 const TrainSearchPage = () => {
   const [timePicked, setTimePicked] = useState<string[]>([]);
@@ -51,6 +52,7 @@ const TrainSearchPage = () => {
   const arrivalTime = searchParams.get("arrivalTime")!;
   const departureTime = searchParams.get("departureTime")!;
 
+
   useEffect(() => {
     const fetchStations = async () => {
       try {
@@ -59,6 +61,8 @@ const TrainSearchPage = () => {
         const journey: any = await searchApiRequest.search.getScheduleByInfos({
           departureStation: departureStation,
           arrivalStation: arrivalStation,
+          departureTime: departureTime,
+          arrivalTime: arrivalTime,
         });
         console.log(journey.payload);
         setJourney(journey.payload.result);
@@ -89,6 +93,15 @@ const TrainSearchPage = () => {
   const trip = searchParams.get("trip")?.trim().toLowerCase() as
     | "one-way"
     | "round-trip";
+  const duration = (departureTime: string, arrivalTime: string) => {
+    const start = new Date(departureTime);
+    const end = new Date(arrivalTime);
+    const totalMinutes = differenceInMinutes(end, start);
+
+    const hours = Math.floor(totalMinutes / 60); // Số giờ
+    const minutes = totalMinutes % 60; // Số phút
+    return `${hours} giờ ${minutes} phút`;
+  };
 
   return (
     <JourneyProvider>
@@ -132,16 +145,18 @@ const TrainSearchPage = () => {
               journey.map((train: TrainJourney) => (
                 <TrainOption
                   key={train.id}
-                  availableSeats={trainJourneyData.seatNumbersAvailable}
+                  departureStationName={train.departureStationName}
+                  arrivalStationName={train.arrivalStationName}
+                  availableSeats={train.seatNumbersAvailable}
                   trainId={train.id}
-                  departureTime={train.departureTime}
-                  arrivalTime={train.arrivalTime}
-                  duration="2 giờ 16 phút"
-                  price={97.4}
-                  trainType="Nozomi 99"
+                  departureTime={format(new Date(train.departureTime), "dd 'Tháng' MM, yyyy HH:mm", { locale: vi })}
+                  arrivalTime={format(new Date(train.arrivalTime), "dd 'Tháng' MM, yyyy HH:mm", { locale: vi })}
+                  duration={duration(train.departureTime, train.arrivalTime)}
+                  trainType={train.trainName}
                   journeyType={activeTab}
                   setActiveTab={setActiveTab}
                 />
+
               ))
             ) : (
               <p className="text-gray-600">Không tìm được chuyến đi.</p>

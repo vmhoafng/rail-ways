@@ -5,7 +5,7 @@ import ClientOnlyButtonLogout from "../ClientOnlyButtonLogout";
 import { useUser } from "@/contexts/UserContext";
 
 export function Header() {
-  const { isLoggedIn, profile } = useUser();
+  const { isLoggedIn, profile, isAdministrator } = useUser();
 
   return (
     <header className="bg-white shadow-md">
@@ -14,43 +14,51 @@ export function Header() {
           klook
         </Link>
         <nav>
-          <ul className="flex items-center justify-center gap-4">
-            <li>
-              <Link href="/" className="text-gray-600 hover:text-gray-900">
-                Trang chủ
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/search"
-                className="text-gray-600 hover:text-gray-900">
-                Tìm kiếm
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/Booking"
-                className="text-gray-600 hover:text-gray-900">
-                Đặt vé
-              </Link>
-            </li>
-            <li>
-
-              {isLoggedIn && profile ? (
-                <Link href="/auth/Profile" className="text-gray-600">Xin chào, {profile.firstName}!</Link>
-              ) : (
-                <Link
-                  href="/auth"
-                  className="text-gray-600 hover:text-gray-900 ">
-                  <FaUser size={"22px"} className="" />
+          {isAdministrator ?
+            <ul className="flex items-center justify-center gap-4">
+              <li>
+                <ClientOnlyButtonLogout />
+              </li>
+            </ul>
+            : <ul className="flex items-center justify-center gap-4">
+              <li>
+                <Link href="/" className="text-gray-600 hover:text-gray-900">
+                  Trang chủ
                 </Link>
-              )}
+              </li>
+              <li>
+                <Link
+                  href="/search"
+                  className="text-gray-600 hover:text-gray-900">
+                  Tìm kiếm
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/Booking"
+                  className="text-gray-600 hover:text-gray-900">
+                  Đặt vé
+                </Link>
+              </li>
+              <li>
 
-            </li>
-            <li>
-              <ClientOnlyButtonLogout />
-            </li>
-          </ul>
+                {isLoggedIn && profile ? (
+                  <Link href="/auth/Profile" className="text-gray-600">Xin chào, {profile.firstName}!</Link>
+                ) : (
+                  <Link
+                    href="/auth"
+                    className="text-gray-600 hover:text-gray-900 ">
+                    <FaUser size={"22px"} className="" />
+                  </Link>
+                )}
+
+              </li>
+              <li>
+                <ClientOnlyButtonLogout />
+              </li>
+            </ul>
+          }
+
         </nav>
       </div>
     </header>

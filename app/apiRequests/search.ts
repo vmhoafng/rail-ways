@@ -1,5 +1,5 @@
 import http from "@/lib/http";
-import { getAllResponse } from "../interfaces";
+import { getAllResponse, GetScheduleResponse } from "../interfaces";
 
 const searchApiRequest = {
   search: {
@@ -12,10 +12,11 @@ const searchApiRequest = {
     getScheduleByInfos: (params: {
       departureStation: string;
       arrivalStation: string;
-      departureTime?: string;
+      departureTime: string;
+      arrivalTime?: string;
     }) => {
       const queryParams = new URLSearchParams(params).toString();
-      return http.get<getAllResponse>(
+      return http.get<GetScheduleResponse>(
         `/api/v1/schedule/anonymous/get-by-departure-and-arrival-name?${queryParams}`
       );
     },

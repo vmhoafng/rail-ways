@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { clientAccessToken } from "@/lib/http";
 
 export default function ButtonLogout() {
-    const { isLoggedIn, setLoggedIn, setProfile, setAccessToken } = useUser();
+    const { isLoggedIn, setLoggedIn, setProfile, setAccessToken, setAdministrator } = useUser();
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -26,6 +26,7 @@ export default function ButtonLogout() {
             setProfile(null);
 
             // Đặt trạng thái không đăng nhập
+            setAdministrator(false);
             setLoggedIn(false);
 
             // Chuyển hướng về trang đăng nhập

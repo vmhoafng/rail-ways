@@ -4,13 +4,14 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface TrainInfo {
   trainId: string;
+  departureStationName: string;
+  arrivalStationName: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;
-  price: number;
   trainType: string;
-  availableSeats: string[];
-  selectedSeats: string[];
+  availableSeats: string[]; // Dữ liệu ghế còn trống chi tiết
+  selectedSeats: string[]; // Danh sách ghế đã chọn
 }
 
 interface SeatsContextType {
@@ -40,13 +41,21 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
     // Load train info from localStorage on initial render
     const storedTrains = localStorage.getItem("trainInfo");
     if (storedTrains) {
-      setTrains(JSON.parse(storedTrains));
+      try {
+        setTrains(JSON.parse(storedTrains));
+      } catch (error) {
+        console.error("Failed to parse train info from localStorage:", error);
+      }
     }
   }, []);
 
   useEffect(() => {
     // Save train info to localStorage whenever it changes
-    localStorage.setItem("trainInfo", JSON.stringify(trains));
+    try {
+      localStorage.setItem("trainInfo", JSON.stringify(trains));
+    } catch (error) {
+      console.error("Failed to save train info to localStorage:", error);
+    }
   }, [trains]);
 
   const updateTrain = (trainInfo: TrainInfo) => {
@@ -66,7 +75,7 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const getTrainInfo = (trainId: string) => {
+  const getTrainInfo = (trainId: string): TrainInfo | undefined => {
     return trains.find((t) => t.trainId === trainId);
   };
 
@@ -74,7 +83,11 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
     setTrains((prevTrains) => {
       return prevTrains.map((train) => {
         if (train.trainId === trainId) {
-          return { ...train, selectedSeats };
+          const updatedTrain = {
+            ...train,
+            selectedSeats,
+          };
+          return updatedTrain;
         }
         return train;
       });
@@ -93,7 +106,8 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
         getTrainInfo,
         updateSelectedSeats,
         clearTrainInfo,
-      }}>
+      }}
+    >
       {children}
     </SeatsContext.Provider>
   );

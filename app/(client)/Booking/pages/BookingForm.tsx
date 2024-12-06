@@ -11,6 +11,8 @@ import TripInfoCard from '../components/TripInfoCard'
 import PriceDetailsCard from '../components/PriceDetailsCard'
 import { cn } from "@/lib/utils"
 import Link from 'next/link'
+import PaymentMethodSelector from '../../Payment/PaymentForm/PaymentMethodSelector'
+import PaymentForm from '../../Payment/PaymentForm/PaymentForm'
 
 
 export default function BookingForm() {
@@ -45,8 +47,8 @@ export default function BookingForm() {
     return (
         <>
             {/* Desktop View */}
-            <div className="hidden md:grid md:container-custom grid-cols-3 gap-x-4 items-start content-start">
-                <div className='col-span-2'>
+            <div className="hidden md:grid md:container-custom grid-cols-3 gap-x-4 items-start justify-stretch">
+                <div className=''>
                     <Card>
                         <CardHeader>
                             <CardTitle>Đặt vé xe</CardTitle>
@@ -57,16 +59,10 @@ export default function BookingForm() {
                             <TripInfo departure="Sài Gòn" arrival="Hà Nội" />
                             <PriceSummary price={price} />
                         </CardContent>
-                        <CardFooter className="flex justify-between">
-                            <Button variant="outline">Hủy</Button>
-                            <Button className='bg-orange-600 hover:bg-orange-500' onClick={handleSubmit}>
-                                <Link href="/Payment">Thanh Toán</Link>
-                            </Button>
-                        </CardFooter>
                     </Card>
                 </div>
 
-                <div className="grid grid-cols-1 grid-rows-2 gap-6">
+                <div className="flex flex-col gap-4 ">
                     <TripInfoCard
                         route="Sai Gon - Ha Noi"
                         departureTime="00:02 01/11/2024"
@@ -78,6 +74,9 @@ export default function BookingForm() {
                         ticketPrice={price}
                         paymentFee={0}
                     />
+                </div>
+                <div className='flex flex-cols '>
+                    <PaymentForm />
                 </div>
             </div>
 

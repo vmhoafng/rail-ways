@@ -1,12 +1,12 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import { Button } from "@/components/ui/button"
 import PaymentMethodSelector from './PaymentMethodSelector'
 import TotalPayment from './TotalPayment'
-import QRCodePayment from './QRCodePayment'
 import CustomerInfo from './CustomerInfo'
 import TripInfo from './TripInfo'
 import PriceDetails from './PriceDetails'
+import { useRouter } from 'next/navigation'
 
 const paymentMethods = [
     { id: 'momo', name: 'MoMo', logo: 'https://storage.googleapis.com/futa-busline-web-cms-prod/momo_bb732ac6f7/momo_bb732ac6f7.svg' },
@@ -17,53 +17,33 @@ const paymentMethods = [
 export default function PaymentForm() {
     const [selectedPayment, setSelectedPayment] = useState('futapay')
     const [timeLeft, setTimeLeft] = useState(1199) // 19:59 in seconds
-
+    const router = useRouter()
     useEffect(() => {
         const timer = setInterval(() => {
             setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0))
         }, 1000)
         return () => clearInterval(timer)
     }, [])
+    const handlePayment = async () => {
+        router.push('/Booking/verify-token?sdfsfd')
+    }
 
     return (
-        <div className="container-custom mx-auto p-6 space-y-6">
-            <h1 className="text-2xl font-bold">Chọn phương thức thanh toán</h1>
+        <div className=" p-1 space-y-2 flex flex-col gap-y-2">
+            <h1 className="text-2xl font-bold ">Chọn phương thức thanh toán</h1>
+            <PaymentMethodSelector
+                paymentMethods={paymentMethods}
+                selectedPayment={selectedPayment}
+                onPaymentChange={setSelectedPayment}
+            />
 
-            <div className="grid md:grid-cols-3 gap-6">
-                <PaymentMethodSelector
-                    paymentMethods={paymentMethods}
-                    selectedPayment={selectedPayment}
-                    onPaymentChange={setSelectedPayment}
-                />
+            <div className="">
+                <TotalPayment amount={290000} timeLeft={timeLeft} />
 
-                <div className="space-y-6">
-                    <TotalPayment amount={290000} timeLeft={timeLeft} />
-
-                    {selectedPayment === 'futapay' && <QRCodePayment />}
-                </div>
-                <div className='flex flex-col gap-5'>
-                    <CustomerInfo
-                        name="Lê Việt Chương"
-                        phone="0357352570"
-                        email="chuonglever@gmail.com"
-                    />
-
-                    <TripInfo
-                        route="An Suong - Da Lat"
-                        departureTime="00:02 01/11/2024"
-                        seatCount={1}
-                        seatNumber="B09"
-                        pickupPoint="Bến xe An Sương"
-                        pickupTime="Trước 23:47 31/10/2024"
-                        dropoffPoint="Đà Lạt"
-                    />
-
-                    <PriceDetails ticketPrice={290000} paymentFee={0} />
-                </div>
             </div>
             <div className="flex justify-end space-x-4">
                 <Button variant="outline">Hủy</Button>
-                <Button className='bg-orange-600 hover:bg-orange-500'>Thanh toán</Button>
+                <Button onClick={handlePayment} className='bg-orange-600 hover:bg-orange-500'>Thanh toán</Button>
             </div>
 
         </div>

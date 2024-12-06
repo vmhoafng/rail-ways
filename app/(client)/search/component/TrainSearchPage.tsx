@@ -50,10 +50,7 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const journey: any = await searchApiRequest.search.getScheduleByInfos({ departureStation, arrivalStation });
-        //y la get k lay body dc ne doi ti
-        //tren swwageer co ma
-        
+        const journey: any = await searchApiRequest.search.getScheduleByInfos({ departureStation: departureStation, arrivalStation: arrivalStation });
         console.log(journey.payload);
         setJourney(journey.payload.result);
         setLoading(false);

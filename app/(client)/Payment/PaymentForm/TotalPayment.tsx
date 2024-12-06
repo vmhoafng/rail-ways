@@ -15,7 +15,7 @@ const TotalPayment: React.FC<TotalPaymentProps> = ({ amount, timeLeft }) => {
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className='mt-[10px]'>
                 <CardTitle className="flex justify-between items-center">
                     <span>Tổng thanh toán</span>
                     <span className="text-2xl  font-bold text-orange-600">{amount.toLocaleString()}đ</span>

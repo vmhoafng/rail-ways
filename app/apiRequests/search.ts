@@ -12,7 +12,12 @@ const searchApiRequest = {
     getScheduleByInfos: (body: any) =>
       http.get<getAllResponse>(
         "/api/v1/schedule/anonymous/get-by-departure-and-arrival-name",
-        body
+        body,
+        {
+          headers: new Headers({
+            "ngrok-skip-browser-warning": "69420",
+          }),
+        }
       ),
   },
 };

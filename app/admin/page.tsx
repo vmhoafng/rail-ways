@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,6 +40,7 @@ import {
   Search,
   Menu,
   Pencil,
+  Calendar,
 } from "lucide-react";
 import {
   Sheet,
@@ -49,6 +50,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TabContentItem {
   title: string;
@@ -80,24 +88,29 @@ const tabContent: TabContentType = {
       { id: "C003", matoa: "C003", loaitoa: "Ghế Ngồi Cứng", soghe: 80 },
     ],
   },
-  seats: {
-    title: "Quản lý Ghế",
-    icon: <CreditCard className="w-4 h-4" />,
-    fields: ["mã ghế", "số ghế", "loại ghế"],
-    data: [
-      { id: "S001", maghe: "S001", soghe: "1A", loaighe: "Giường Nằm" },
-      { id: "S002", maghe: "S002", soghe: "2B", loaighe: "Ghế Ngồi Mềm" },
-      { id: "S003", maghe: "S003", soghe: "3C", loaighe: "Ghế Ngồi Cứng" },
-    ],
-  },
   stations: {
     title: "Quản lý Ga",
     icon: <MapPin className="w-4 h-4" />,
     fields: ["mã ga", "tên ga", "địa chỉ"],
     data: [
-      { id: "ST001", maga: "ST001", tenga: "Ga Hà Nội", diachi: "120 Lê Duẩn, Hà Nội" },
-      { id: "ST002", maga: "ST002", tenga: "Ga Sài Gòn", diachi: "1 Nguyễn Thông, Quận 3, TP.HCM" },
-      { id: "ST003", maga: "ST003", tenga: "Ga Đà Nẵng", diachi: "202 Hải Phòng, Đà Nẵng" },
+      {
+        id: "ST001",
+        maga: "ST001",
+        tenga: "Ga Hà Nội",
+        diachi: "120 Lê Duẩn, Hà Nội",
+      },
+      {
+        id: "ST002",
+        maga: "ST002",
+        tenga: "Ga Sài Gòn",
+        diachi: "1 Nguyễn Thông, Quận 3, TP.HCM",
+      },
+      {
+        id: "ST003",
+        maga: "ST003",
+        tenga: "Ga Đà Nẵng",
+        diachi: "202 Hải Phòng, Đà Nẵng",
+      },
     ],
   },
   tickets: {
@@ -115,8 +128,18 @@ const tabContent: TabContentType = {
     icon: <Users className="w-4 h-4" />,
     fields: ["id", "tên", "email"],
     data: [
-      { id: "U001", ma: "U001", ten: "Nguyễn Văn A", email: "nguyenvana@example.com" },
-      { id: "U002", ma: "U002", ten: "Trần Thị B", email: "tranthib@example.com" },
+      {
+        id: "U001",
+        ma: "U001",
+        ten: "Nguyễn Văn A",
+        email: "nguyenvana@example.com",
+      },
+      {
+        id: "U002",
+        ma: "U002",
+        ten: "Trần Thị B",
+        email: "tranthib@example.com",
+      },
       { id: "U003", ma: "U003", ten: "Lê Văn C", email: "levanc@example.com" },
     ],
   },
@@ -131,7 +154,6 @@ const tabContent: TabContentType = {
     ],
   },
 };
-
 
 interface ItemDialogProps {
   fields: string[];
@@ -207,13 +229,15 @@ interface DataTableProps {
   data: Record<string, string | number>[];
   onEdit: (item: Record<string, string | number>) => void;
 }
+
 function removeAccents(str: string): string {
   return str
-    .normalize("NFD") // Chia nhỏ các ký tự thành ký tự cơ bản và các dấu
-    .replace(/[\u0300-\u036f]/g, "") // Loại bỏ các dấu
-    .replace(/đ/g, "d") // Thay thế 'đ' thành 'd'
-    .replace(/Đ/g, "D"); // Thay thế 'Đ' thành 'D'
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
 }
+
 const DataTable: React.FC<DataTableProps> = ({ fields, data, onEdit }) => (
   <div className="overflow-x-auto">
     <Table>
@@ -364,14 +388,157 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => (
   </Sheet>
 );
 
-export default function AdminDashboardWithEdit() {
+interface RouteData {
+  departure: string;
+  arrival: string;
+}
+
+const tempTrains = ["SE1", "SE2", "SE3", "SE4", "SE5"];
+const tempStations = ["Hà Nội", "Đà Nẵng", "Huế", "Nha Trang", "Sài Gòn"];
+const tempRoutes: RouteData[] = [
+  { departure: "Hà Nội", arrival: "Đà Nẵng" },
+  { departure: "Hà Nội", arrival: "Huế" },
+  { departure: "Hà Nội", arrival: "Sài Gòn" },
+  { departure: "Đà Nẵng", arrival: "Huế" },
+  { departure: "Đà Nẵng", arrival: "Nha Trang" },
+  { departure: "Đà Nẵng", arrival: "Sài Gòn" },
+  { departure: "Huế", arrival: "Nha Trang" },
+  { departure: "Huế", arrival: "Sài Gòn" },
+  { departure: "Nha Trang", arrival: "Sài Gòn" },
+];
+
+const AddScheduleDialog: React.FC = () => {
+  const [formData, setFormData] = useState({
+    trainName: "",
+    departureTime: "",
+    departureStation: "",
+    arrivalStation: "",
+  });
+  const [availableArrivals, setAvailableArrivals] = useState<string[]>([]);
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+    if (field === "departureStation") {
+      const filteredArrivals = tempRoutes
+        .filter((route) => route.departure === value)
+        .map((route) => route.arrival);
+      setAvailableArrivals(filteredArrivals);
+      setFormData((prev) => ({ ...prev, arrivalStation: "" }));
+    }
+  };
+
+  const handleSubmit = () => {
+    console.log("Schedule data:", formData);
+    // Here you would typically send this data to your backend
+  };
+
+  return (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Thêm lịch trình</DialogTitle>
+        <DialogDescription>
+          Điền thông tin để thêm mới lịch trình.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="trainName" className="text-right">
+            Tên tàu
+          </Label>
+          <Select onValueChange={(value) => handleChange("trainName", value)}>
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Chọn tàu" />
+            </SelectTrigger>
+            <SelectContent>
+              {tempTrains.map((train) => (
+                <SelectItem key={train} value={train}>
+                  {train}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="departureTime" className="text-right">
+            Thời gian khởi hành
+          </Label>
+          <Input
+            id="departureTime"
+            type="datetime-local"
+            value={formData.departureTime}
+            onChange={(e) => handleChange("departureTime", e.target.value)}
+            className="col-span-3"
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="departureStation" className="text-right">
+            Ga đi
+          </Label>
+          <Select
+            onValueChange={(value) => handleChange("departureStation", value)}>
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Chọn ga đi" />
+            </SelectTrigger>
+            <SelectContent>
+              {tempStations.map((station) => (
+                <SelectItem key={station} value={station}>
+                  {station}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="arrivalStation" className="text-right">
+            Ga đến
+          </Label>
+          <Select
+            onValueChange={(value) => handleChange("arrivalStation", value)}
+            disabled={!formData.departureStation}>
+            <SelectTrigger className="col-span-3">
+              <SelectValue
+                placeholder={
+                  formData.departureStation ? "Chọn ga đến" : "Hãy chọn ga đi"
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {availableArrivals.map((station) => (
+                <SelectItem key={station} value={station}>
+                  {station}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <Button type="submit" className="w-full" onClick={handleSubmit}>
+        Thêm lịch trình
+      </Button>
+    </DialogContent>
+  );
+};
+
+export default function AdminDashboardWithSchedule() {
   const [activeTab, setActiveTab] =
     React.useState<keyof TabContentType>("trains");
 
   return (
     <div className="container-custom mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold">Trang Quản Trị</h1>
+        <div className="flex items-center space-x-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">Trang Quản Trị</h1>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Calendar className="w-4 h-4 mr-2" />
+                Thêm lịch trình
+              </Button>
+            </DialogTrigger>
+            <AddScheduleDialog />
+          </Dialog>
+        </div>
         <MobileNav activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
       <Tabs
@@ -380,7 +547,7 @@ export default function AdminDashboardWithEdit() {
         className="space-y-4">
         <Card className="hidden md:block">
           <CardContent className="p-2">
-            <TabsList className="grid grid-cols-2 md:grid-cols-7 gap-2">
+            <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2">
               {Object.entries(tabContent).map(([key, { title, icon }]) => (
                 <TabsTrigger
                   key={key}

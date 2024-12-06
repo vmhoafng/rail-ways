@@ -39,7 +39,7 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
   const [timePicked, setTimePicked] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const { returnTrainId, outboundTrainId } = useJourneyContext();
-  const [Journey, setJourney] = useState<[]>([]);
+  const [Journey, setJourney] = useState<TrainJourney[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -50,11 +50,12 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const journey: any = await searchApiRequest.search.getScheduleByInfos({ departureStation, arrivalStation });
-        //y la get k lay body dc ne doi ti
-        //tren swwageer co ma
-        
-        console.log(journey.payload);
+        console.log("git");
+        const journey: any = await searchApiRequest.search.getScheduleByInfos({
+          departureStation,
+          arrivalStation,
+        });
+        console.log(journey);
         setJourney(journey.payload.result);
         setLoading(false);
       } catch (error) {

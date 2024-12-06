@@ -71,11 +71,29 @@ const tabContent: TabContentType = {
   trains: {
     title: "Quản lý Tàu",
     icon: <Train className="w-4 h-4" />,
-    fields: ["mã tàu", "tên tàu", "loại tàu"],
+    fields: ["mã tàu", "tên tàu", "loại tàu", "vị trí hiện tại"],
     data: [
-      { id: "T001", matau: "T001", tentau: "SE1", loaitau: "Tàu Nhanh" },
-      { id: "T002", matau: "T002", tentau: "SE2", loaitau: "Tàu Nhanh" },
-      { id: "T003", matau: "T003", tentau: "TN1", loaitau: "Tàu Thường" },
+      {
+        id: "T001",
+        matau: "T001",
+        tentau: "SE1",
+        loaitau: "Tàu Nhanh",
+        vitrihientai: "Ga Hà Nội",
+      },
+      {
+        id: "T002",
+        matau: "T002",
+        tentau: "SE2",
+        loaitau: "Tàu Nhanh",
+        vitrihientai: "Ga Hà Nội",
+      },
+      {
+        id: "T003",
+        matau: "T003",
+        tentau: "TN1",
+        loaitau: "Tàu Thường",
+        vitrihientai: "Ga Hà Nội",
+      },
     ],
   },
   carriages: {
@@ -196,19 +214,19 @@ const ItemDialog: React.FC<ItemDialogProps> = ({
         {fields.map((field, index) => (
           <div key={index} className="grid grid-cols-4 items-center gap-4">
             <Label
-              htmlFor={removeAccents(field.toLowerCase().replace(" ", ""))}
+              htmlFor={removeAccents(field.toLowerCase().replace(/ /g, ""))}
               className="text-right">
               {field}
             </Label>
             <Input
-              id={removeAccents(field.toLowerCase().replace(" ", ""))}
+              id={removeAccents(field.toLowerCase().replace(/ /g, ""))}
               value={
-                formData[removeAccents(field.toLowerCase().replace(" ", ""))] ||
+                formData[removeAccents(field.toLowerCase().replace(/ /g, ""))] ||
                 ""
               }
               onChange={(e) =>
                 handleChange(
-                  removeAccents(field.toLowerCase().replace(" ", "")),
+                  removeAccents(field.toLowerCase().replace(/ /g, "")),
                   e.target.value
                 )
               }
@@ -255,7 +273,7 @@ const DataTable: React.FC<DataTableProps> = ({ fields, data, onEdit }) => (
             {fields.map((field, fieldIndex) => {
               return (
                 <TableCell key={fieldIndex}>
-                  {item[removeAccents(field.toLowerCase().replace(" ", ""))]}
+                  {item[removeAccents(field.toLowerCase().replace(/ /g, ""))]}
                 </TableCell>
               );
             })}

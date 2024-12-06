@@ -6,8 +6,6 @@ import { useUser } from "@/contexts/UserContext";
 
 export function Header() {
   const { isLoggedIn, profile } = useUser();
-  console.log("Header isLoggedIn", isLoggedIn);
-  console.log("Header profile", profile);
 
   return (
     <header className="bg-white shadow-md">
@@ -31,7 +29,7 @@ export function Header() {
             </li>
             <li>
               <Link
-                href="/booking"
+                href="/Booking"
                 className="text-gray-600 hover:text-gray-900">
                 Đặt vé
               </Link>

@@ -14,6 +14,10 @@ import { useSearchParams } from "next/navigation";
 import { vi } from "date-fns/locale";
 import { format } from "date-fns";
 import searchApiRequest from "@/app/apiRequests/search";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+
 interface TrainJourney {
   id: string;
   departureStationName: string;
@@ -34,12 +38,11 @@ const trainJourneyData: TrainJourney = {
   seatNumbersAvailable: ["SE1.1", "SE1.2", "SE1.3", "SE1.4", "SE1.5"],
 };
 
-const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
-  // const timeRanges = ["00:00-08:59", "09:00-11:59", "12:00-16:59"];
+const TrainSearchPage = () => {
   const [timePicked, setTimePicked] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const { returnTrainId, outboundTrainId } = useJourneyContext();
-  const [Journey, setJourney] = useState<TrainJourney[]>([]);
+  const [journey, setJourney] = useState<TrainJourney[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -47,25 +50,27 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
   const arrivalStation = searchParams.get("arrivalStation")!;
   const arrivalTime = searchParams.get("arrivalTime")!;
   const departureTime = searchParams.get("departureTime")!;
+
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        console.log("git");
+        setLoading(true);
+        setError(null);
         const journey: any = await searchApiRequest.search.getScheduleByInfos({
-          departureStation,
-          arrivalStation,
+          departureStation: departureStation,
+          arrivalStation: arrivalStation,
         });
-        console.log(journey);
+        console.log(journey.payload);
         setJourney(journey.payload.result);
-        setLoading(false);
       } catch (error) {
-        setError("Failed to fetch train data");
+        setError("Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau.");
+      } finally {
         setLoading(false);
       }
     };
     fetchStations();
-  }, []);
-  // Effect to manage tab switching based on selected train IDs
+  }, [departureStation, arrivalStation]);
+
   useEffect(() => {
     if (!outboundTrainId) setActiveTab("outbound");
     else if (!returnTrainId) setActiveTab("return");
@@ -84,21 +89,11 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
   const trip = searchParams.get("trip")?.trim().toLowerCase() as
     | "one-way"
     | "round-trip";
+
   return (
     <JourneyProvider>
       <ActiveTrainProvider>
         <div className="max-w-4xl mx-auto px-4 space-y-8">
-          {/* <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Tìm kiếm chuyến tàu
-            </h1>
-            {/* <DatePicker /> */}
-          {/* <TimeFilter
-              timePicked={timePicked}
-              filterTimeRanges={filterTimeRanges}
-              timeRanges={timeRanges}
-            /> }
-          </div> */}
           {trip === "round-trip" && (
             <JourneyTabs
               activeTab={activeTab}
@@ -117,8 +112,24 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
                 {activeTab === "outbound" ? "Chuyến đi" : "Chuyến về"}
               </h2>
             )}
-            {trains && trains.length > 0 ? (
-              trains.map((train: TrainJourney) => (
+            {loading ? (
+              // Loading skeleton
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="h-[100px] w-full" />
+                  </div>
+                ))}
+              </>
+            ) : error ? (
+              // Error message
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Lỗi</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : journey && journey.length > 0 ? (
+              journey.map((train: TrainJourney) => (
                 <TrainOption
                   key={train.id}
                   availableSeats={trainJourneyData.seatNumbersAvailable}
@@ -133,21 +144,7 @@ const TrainSearchPage = ({ trains }: { trains: TrainJourney[] | null }) => {
                 />
               ))
             ) : (
-              <>
-                <TrainOption
-                  key={"train.id"}
-                  availableSeats={trainJourneyData.seatNumbersAvailable}
-                  trainId={"train.id"}
-                  departureTime={""}
-                  arrivalTime={""}
-                  duration="2 giờ 16 phút"
-                  price={97.4}
-                  trainType="Nozomi 99"
-                  journeyType={activeTab}
-                  setActiveTab={setActiveTab}
-                />
-                <p className="text-gray-600">Không tìm được chuyến đi.</p>
-              </>
+              <p className="text-gray-600">Không tìm được chuyến đi.</p>
             )}
           </div>
         </div>

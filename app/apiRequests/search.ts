@@ -9,16 +9,16 @@ const searchApiRequest = {
           "ngrok-skip-browser-warning": "69420",
         }),
       }),
-    getScheduleByInfos: (body: any) =>
-      http.get<getAllResponse>(
-        "/api/v1/schedule/anonymous/get-by-departure-and-arrival-name",
-        body,
-        {
-          headers: new Headers({
-            "ngrok-skip-browser-warning": "69420",
-          }),
-        }
-      ),
+    getScheduleByInfos: (params: {
+      departureStation: string;
+      arrivalStation: string;
+      departureTime?: string;
+    }) => {
+      const queryParams = new URLSearchParams(params).toString();
+      return http.get<getAllResponse>(
+        `/api/v1/schedule/anonymous/get-by-departure-and-arrival-name?${queryParams}`
+      );
+    },
   },
 };
 

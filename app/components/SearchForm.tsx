@@ -1,9 +1,9 @@
 "use client";
+
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { format, isBefore, startOfToday } from "date-fns";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,24 +12,39 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ArrowRightLeft } from "lucide-react";
+import { AlertCircle, ArrowRightLeft, MapPin } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useStations } from "../context/StationsContext";
-import { apiService } from "../../lib/apiService";
 import searchApiRequest from "../apiRequests/search";
 import { Station } from "../interfaces";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function SearchForm() {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filteredFromStations, setFilteredFromStations] = useState<Station[]>(
+    []
+  );
+  const [filteredToStations, setFilteredToStations] = useState<Station[]>([]);
+
   useEffect(() => {
     const fetchStations = async () => {
       try {
         const station = await searchApiRequest.search.getAllStations();
         setStations(station.payload.result);
+        setFilteredFromStations(station.payload.result);
+        setFilteredToStations(station.payload.result);
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch train data");
@@ -44,11 +59,15 @@ export default function SearchForm() {
   const [from, setFrom] = useState(searchParams.get("departureStation") || "");
   const [to, setTo] = useState(searchParams.get("arrivalStation") || "");
   const { openMenus, toggleMenu, closeAllMenus } = useDropdownMenu();
-  const [date, setDate] = React.useState<Date | any>(
-    new Date(+searchParams.get("departureTime")! || Date.now())
+  const [date, setDate] = React.useState<Date | undefined>(
+    searchParams.get("departureTime")
+      ? new Date(+searchParams.get("departureTime")!)
+      : undefined
   );
-  const [returnDate, setReturnDate] = React.useState<Date | any>(
-    new Date(+searchParams.get("arrivalTime")! || Date.now())
+  const [returnDate, setReturnDate] = React.useState<Date | undefined>(
+    searchParams.get("arrivalTime")
+      ? new Date(+searchParams.get("arrivalTime")!)
+      : undefined
   );
   const ValiDate = (day: Date) =>
     isBefore(day, startOfToday()) || (date ? isBefore(day, date) : false);
@@ -74,13 +93,8 @@ export default function SearchForm() {
         )}&arrivalStation=${encodeURIComponent(
           formData.arrivalStation
         )}&trip=${encodeURIComponent("one-way")}
-        &departureTime=${encodeURIComponent(formData.departureTime)}`
+        &departureTime=${encodeURIComponent(formData.departureTime || "")}`
       );
-      try {
-        // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
-      } catch (error) {
-        console.error("Failed to fetch schedule:", error);
-      }
     }
     if (trip === "round-trip") {
       const formData = {
@@ -89,24 +103,29 @@ export default function SearchForm() {
         departureTime: date && date.getTime(),
         arrivalTime: returnDate && returnDate.getTime(),
       };
-      try {
-        // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
-        router.push(
-          `/search?departureStation=${encodeURIComponent(
-            formData.departureStation
-          )}&arrivalStation=${encodeURIComponent(
-            formData.arrivalStation
-          )}&trip=${encodeURIComponent("round-trip")}
-          &departureTime=${encodeURIComponent(formData.departureTime)}
-          &arrivalTime=${encodeURIComponent(formData.arrivalTime)}`
-        );
-      } catch (error) {
-        console.error("Failed to fetch schedule:", error);
-      }
+      router.push(
+        `/search?departureStation=${encodeURIComponent(
+          formData.departureStation
+        )}&arrivalStation=${encodeURIComponent(
+          formData.arrivalStation
+        )}&trip=${encodeURIComponent("round-trip")}
+        &departureTime=${encodeURIComponent(formData.departureTime || "")}
+        &arrivalTime=${encodeURIComponent(formData.arrivalTime || "")}`
+      );
     }
-    // Tạo object chứa dữ liệu form
+  };
 
-    // Gửi dữ liệu hoặc thực hiện hành động tiếp theo
+  const filterStations = (input: string, type: "from" | "to") => {
+    const filtered = stations.filter(
+      (station) =>
+        station.name.toLowerCase().includes(input.toLowerCase()) &&
+        (type === "from" ? station.name !== to : station.name !== from)
+    );
+    if (type === "from") {
+      setFilteredFromStations(filtered);
+    } else {
+      setFilteredToStations(filtered);
+    }
   };
 
   return (
@@ -120,11 +139,13 @@ export default function SearchForm() {
             <RadioGroupItem value="one-way" id="one-way" className="hidden" />
             <Label htmlFor="one-way" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${trip === "one-way" ? "border-orange-600" : "border-gray-200"
-                  }`}>
+                className={`border-2 rounded-full -mt-0.5 ${
+                  trip === "one-way" ? "border-orange-600" : "border-gray-200"
+                }`}>
                 <span
-                  className={`flex items-center border cursor-pointer size-3 rounded-full ${trip === "one-way" ? "bg-orange-600" : "bg-white"
-                    }`}></span>
+                  className={`flex items-center border cursor-pointer size-3 rounded-full ${
+                    trip === "one-way" ? "bg-orange-600" : "bg-white"
+                  }`}></span>
               </span>
               Một chiều
             </Label>
@@ -137,13 +158,15 @@ export default function SearchForm() {
             />
             <Label htmlFor="round-trip" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${trip === "round-trip"
-                  ? "border-orange-600"
-                  : "border-gray-200"
-                  }`}>
+                className={`border-2 rounded-full -mt-0.5 ${
+                  trip === "round-trip"
+                    ? "border-orange-600"
+                    : "border-gray-200"
+                }`}>
                 <span
-                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${trip === "round-trip" ? "bg-orange-600" : "bg-white"
-                    }`}></span>
+                  className={`flex items-center border cursor-pointer size-3 rounded-full ${
+                    trip === "round-trip" ? "bg-orange-600" : "bg-white"
+                  }`}></span>
               </span>
               Khứ hồi
             </Label>
@@ -162,7 +185,7 @@ export default function SearchForm() {
                   <Input
                     ref={refFrom}
                     onBlur={() => {
-                      closeAllMenus();
+                      setTimeout(() => closeAllMenus(), 200);
                     }}
                     onFocus={() => {
                       toggleMenu("from");
@@ -172,42 +195,81 @@ export default function SearchForm() {
                     }}
                     id="from"
                     value={from}
-                    onChange={(e) => setFrom(e.target.value)}
+                    onChange={(e) => {
+                      setFrom(e.target.value);
+                      filterStations(e.target.value, "from");
+                    }}
                     className="block w-full ring-0 border-0 focus:focus-visible:ring-orange-600 shadow-none h-14 pt-5 font-semibold focus:bg-white"
                   />
                   {openMenus["from"] && (
                     <div className="p-4 mt-2 bg-white w-full absolute rounded-lg shadow-md max-h-96 overflow-y-scroll z-20">
-                      <h3 className="font-semibold text-lg mt-4 mb-2">
+                      <h3 className="font-semibold text-lg mb-2">
                         Ga khởi hành
                       </h3>
                       <ul className="space-y-3">
-                        {stations ? (
-                          stations
-                            .filter((station) => station.name !== to)
-                            .map((station, index) => (
-                              <li
+                        {loading ? (
+                          <>
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="space-y-3">
+                                <Skeleton className="h-[16px] w-full" />
+                              </div>
+                            ))}
+                          </>
+                        ) : error ? (
+                          <Alert variant="destructive">
+                            <AlertCircle className="" />
+                            <AlertTitle>Lỗi</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                          </Alert>
+                        ) : filteredFromStations.length > 0 ? (
+                          filteredFromStations.map((station, index) => (
+                            <li
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              <span
                                 onMouseDown={(e) => {
                                   e.preventDefault();
-                                  e.stopPropagation();
                                   setFrom(station.name);
                                   refFrom.current?.blur();
-                                  closeAllMenus();
-                                }}
-                                key={index}
-                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                                }}>
                                 {station.name}
-                              </li>
-                            ))
+                              </span>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="ml-2"
+                                    onMouseDown={(e) => e.preventDefault()}>
+                                    <MapPin className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                  <DialogHeader>
+                                    <DialogTitle>{station.name}</DialogTitle>
+                                    <DialogDescription>
+                                      {station.address}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="aspect-video w-full">
+                                    <iframe
+                                      width="100%"
+                                      height="100%"
+                                      style={{ border: 0 }}
+                                      loading="lazy"
+                                      allowFullScreen
+                                      referrerPolicy="no-referrer-when-downgrade"
+                                      src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(
+                                        station.address
+                                      )}`}></iframe>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </li>
+                          ))
                         ) : (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            Không tải được dữ liệu
+                          <li className="text-gray-600">
+                            Không tìm thấy ga phù hợp
                           </li>
                         )}
                       </ul>
@@ -216,7 +278,7 @@ export default function SearchForm() {
                 </div>
                 <Button
                   variant="ghost"
-                  className=" bg-white absolute size-8 top-1/2 -mt-4 left-1/2 -ml-5 z-10 rounded-full text-orange-600 hover:bg-white hover:text-orange-600 shadow-md"
+                  className="bg-white absolute size-8 top-1/2 -mt-4 left-1/2 -ml-5 z-10 rounded-full text-orange-600 hover:bg-white hover:text-orange-600 shadow-md"
                   onClick={() => {
                     const temp = from;
                     setFrom(to);
@@ -233,7 +295,7 @@ export default function SearchForm() {
                   <Input
                     ref={refTo}
                     onBlur={() => {
-                      closeAllMenus();
+                      setTimeout(() => closeAllMenus(), 200);
                     }}
                     onFocus={() => {
                       toggleMenu("to");
@@ -243,42 +305,79 @@ export default function SearchForm() {
                     }}
                     id="to"
                     value={to}
-                    onChange={(e) => setTo(e.target.value)}
+                    onChange={(e) => {
+                      setTo(e.target.value);
+                      filterStations(e.target.value, "to");
+                    }}
                     className="lg:pl-7 block w-full ring-0 border-0 focus:focus-visible:ring-orange-600 shadow-none h-14 pt-5 font-semibold focus:bg-white"
                   />
                   {openMenus["to"] && (
                     <div className="p-4 mt-2 bg-white w-full absolute rounded-lg shadow-md max-h-96 overflow-y-scroll z-20">
-                      <h3 className="font-semibold text-lg mt-4 mb-2">
-                        Ga đến
-                      </h3>
+                      <h3 className="font-semibold text-lg mb-2">Ga đến</h3>
                       <ul className="space-y-3">
-                        {stations ? (
-                          stations
-                            .filter((station) => station.name !== from)
-                            .map((station, index) => (
-                              <li
+                        {loading ? (
+                          <>
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="space-y-3">
+                                <Skeleton className="h-[16px] w-full" />
+                              </div>
+                            ))}
+                          </>
+                        ) : error ? (
+                          <Alert variant="destructive">
+                            <AlertCircle className="" />
+                            <AlertTitle>Lỗi</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                          </Alert>
+                        ) : filteredToStations.length > 0 ? (
+                          filteredToStations.map((station, index) => (
+                            <li
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              <span
                                 onMouseDown={(e) => {
                                   e.preventDefault();
-                                  e.stopPropagation();
                                   setTo(station.name);
                                   refTo.current?.blur();
-                                  closeAllMenus();
-                                }}
-                                key={index}
-                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                                }}>
                                 {station.name}
-                              </li>
-                            ))
+                              </span>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="ml-2"
+                                    onClick={(e) => e.preventDefault()}>
+                                    <MapPin className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                  <DialogHeader>
+                                    <DialogTitle>{station.name}</DialogTitle>
+                                    <DialogDescription>
+                                      {station.address}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="aspect-video w-full">
+                                    <iframe
+                                      width="100%"
+                                      height="100%"
+                                      style={{ border: 0 }}
+                                      loading="lazy"
+                                      allowFullScreen
+                                      referrerPolicy="no-referrer-when-downgrade"
+                                      src={`https://www.google.com/maps/embed/v1/place/${encodeURIComponent(
+                                        station.address
+                                      )}`}></iframe>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </li>
+                          ))
                         ) : (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            Không tải được dữ liệu
+                          <li className="text-gray-600">
+                            Không tìm thấy ga phù hợp
                           </li>
                         )}
                       </ul>
@@ -355,8 +454,8 @@ export default function SearchForm() {
                       mode="single"
                       selected={date}
                       onSelect={(selectedDate) => {
-                        setDate(selectedDate); // Set the selected date
-                        setReturnDate(undefined); // Set the return date if needed
+                        setDate(selectedDate);
+                        setReturnDate(undefined);
                       }}
                       initialFocus
                       className="w-full"

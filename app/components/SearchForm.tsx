@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ArrowRightLeft } from "lucide-react";
+import { AlertCircle, ArrowRightLeft } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +20,8 @@ import { useStations } from "../context/StationsContext";
 import { apiService } from "../../lib/apiService";
 import searchApiRequest from "../apiRequests/search";
 import { Station } from "../interfaces";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SearchForm() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -120,11 +122,13 @@ export default function SearchForm() {
             <RadioGroupItem value="one-way" id="one-way" className="hidden" />
             <Label htmlFor="one-way" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${trip === "one-way" ? "border-orange-600" : "border-gray-200"
-                  }`}>
+                className={` border-2 rounded-full -mt-0.5 ${
+                  trip === "one-way" ? "border-orange-600" : "border-gray-200"
+                }`}>
                 <span
-                  className={`flex items-center border cursor-pointer size-3 rounded-full ${trip === "one-way" ? "bg-orange-600" : "bg-white"
-                    }`}></span>
+                  className={`flex items-center border cursor-pointer size-3 rounded-full ${
+                    trip === "one-way" ? "bg-orange-600" : "bg-white"
+                  }`}></span>
               </span>
               Một chiều
             </Label>
@@ -137,13 +141,15 @@ export default function SearchForm() {
             />
             <Label htmlFor="round-trip" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${trip === "round-trip"
-                  ? "border-orange-600"
-                  : "border-gray-200"
-                  }`}>
+                className={` border-2 rounded-full -mt-0.5 ${
+                  trip === "round-trip"
+                    ? "border-orange-600"
+                    : "border-gray-200"
+                }`}>
                 <span
-                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${trip === "round-trip" ? "bg-orange-600" : "bg-white"
-                    }`}></span>
+                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${
+                    trip === "round-trip" ? "bg-orange-600" : "bg-white"
+                  }`}></span>
               </span>
               Khứ hồi
             </Label>
@@ -177,11 +183,27 @@ export default function SearchForm() {
                   />
                   {openMenus["from"] && (
                     <div className="p-4 mt-2 bg-white w-full absolute rounded-lg shadow-md max-h-96 overflow-y-scroll z-20">
-                      <h3 className="font-semibold text-lg mt-4 mb-2">
+                      <h3 className="font-semibold text-lg mb-2">
                         Ga khởi hành
                       </h3>
                       <ul className="space-y-3">
-                        {stations ? (
+                        {loading ? (
+                          // Loading skeleton
+                          <>
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="space-y-3">
+                                <Skeleton className="h-[16px] w-full" />
+                              </div>
+                            ))}
+                          </>
+                        ) : error ? (
+                          // Error message
+                          <Alert variant="destructive">
+                            <AlertCircle className="" />
+                            <AlertTitle>Lỗi</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                          </Alert>
+                        ) : stations ? (
                           stations
                             .filter((station) => station.name !== to)
                             .map((station, index) => (
@@ -248,11 +270,25 @@ export default function SearchForm() {
                   />
                   {openMenus["to"] && (
                     <div className="p-4 mt-2 bg-white w-full absolute rounded-lg shadow-md max-h-96 overflow-y-scroll z-20">
-                      <h3 className="font-semibold text-lg mt-4 mb-2">
-                        Ga đến
-                      </h3>
+                      <h3 className="font-semibold text-lg mb-2">Ga đến</h3>
                       <ul className="space-y-3">
-                        {stations ? (
+                        {loading ? (
+                          // Loading skeleton
+                          <>
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="space-y-3">
+                                <Skeleton className="h-[16px] w-full" />
+                              </div>
+                            ))}
+                          </>
+                        ) : error ? (
+                          // Error message
+                          <Alert variant="destructive">
+                            <AlertCircle className="" />
+                            <AlertTitle>Lỗi</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                          </Alert>
+                        ) : stations ? (
                           stations
                             .filter((station) => station.name !== from)
                             .map((station, index) => (

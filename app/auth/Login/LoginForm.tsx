@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useUser } from "@/contexts/UserContext";
 import "./LoginGoogle.css";
 import GoogleLogin from "./LoginGoogle";
+import { jwtDecode } from "jwt-decode";
 const formSchema = z.object({
     email: z.string().trim().min(1, { message: "Email là bắt buộc" }).email({ message: "Email không đúng định dạng" }),
     password: z.string().min(6, { message: "Mật khẩu ít nhất 6 kí tự" }),
@@ -57,6 +58,13 @@ export function LoginForm() {
             setProfile(profileData); // Gọi hàm từ UserContext
             console.log(profileData);
 
+            // Decode Access Token để lấy role
+            const decodedToken: { "X-User-Roles": string[] } = jwtDecode(accessToken);
+            const roles = decodedToken["X-User-Roles"];
+
+            if (!roles || roles.length === 0) {
+                throw new Error("No roles found in token!");
+            }
 
             toast({
                 title: "SUCCESS",
@@ -65,8 +73,17 @@ export function LoginForm() {
                 variant: "default",
             });
 
-            setLoggedIn(true); // Cập nhật trạng thái đăng nhập
-            router.push("/");
+            setLoggedIn(true);
+
+            // Phân quyền dựa trên roles
+            if (roles.length === 1 && roles.includes("USER")) {
+                // Chỉ có role USER, điều hướng về trang chính
+                router.push("/");
+            } else {
+                // Có thêm các role khác, điều hướng về trang admin kèm theo roles
+                const rolesQuery = encodeURIComponent(roles.join(","));
+                router.push(`/admin?roles=${rolesQuery}`);
+            }
         } catch (error) {
             console.error(error);
             handleErrorApi({

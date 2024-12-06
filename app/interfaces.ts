@@ -145,3 +145,91 @@ export interface getAllResponse {
   status: number;
   result: Station[];
 }
+export interface createTrainBodyType {
+  trainName: string;
+  trainNumber: string;
+  trainType: string;
+  currentStationId: number;
+}
+export interface createTrainResponse {
+  message: string[];
+  status: number;
+  result: {
+    trainName: string;
+    trainNumber: string;
+    trainType: string;
+    currentStationId: number;
+  };
+}
+export interface createRouteBodyType {
+  name: string;
+  stationIds: number[];
+}
+export interface createRouteResponse {
+  message: string[];
+  status: number;
+  result: {
+    name: string;
+    stationIds: number[];
+  };
+}
+export interface createStationBodyType {
+  name: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+  };
+}
+export interface createStationResponse {
+  message: string[];
+  status: number;
+  result: {
+    name: string;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+    };
+  };
+}
+export interface getAllTicketsResponse {
+  message: string[];
+  status: number;
+  result: {
+    departureStationName: string;
+    arrivalStationName: string;
+    departureTime: string;
+    seatNumber: string[];
+    price: number;
+    trainName: string;
+  }[];
+}
+export interface updateUserBodyType {
+  email: string;
+  password: string;
+  oldPassword: string;
+}
+export interface deleteUserBodyType {
+  username: string;
+  password: string;
+  deleeteUserId: number;
+}
+export interface createRailCarBodyType {
+  name: string;
+  railcarType: string;
+  capacity: number;
+  seatPerRow: number;
+  isHaveFloor: boolean;
+}
+export interface createRailCarResponse {
+  message: string[];
+  status: number;
+  result: {
+    name: string;
+    railcarType: string;
+    capacity: number;
+    seatPerRow: number;
+    isHaveFloor: boolean;
+  };
+}

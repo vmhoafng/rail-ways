@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -49,6 +49,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useRouter } from "next/navigation";
 
 interface TabContentItem {
   title: string;
@@ -139,6 +140,7 @@ interface ItemDialogProps {
   initialData?: Record<string, string | number>;
   onSubmit: (data: Record<string, string | number>) => void;
 }
+
 
 const ItemDialog: React.FC<ItemDialogProps> = ({
   fields,
@@ -367,6 +369,34 @@ const MobileNav: React.FC<MobileNavProps> = ({ activeTab, setActiveTab }) => (
 export default function AdminDashboardWithEdit() {
   const [activeTab, setActiveTab] =
     React.useState<keyof TabContentType>("trains");
+
+  const router = useRouter();
+
+  useEffect(() => {
+    // Lấy token từ localStorage
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      // Nếu không có token, điều hướng về trang login
+      router.push("/auth");
+      return;
+    }
+
+    try {
+      // Decode token để lấy roles
+      const decodedToken = JSON.parse(atob(token.split(".")[1]));
+      const roles = decodedToken["X-User-Roles"];
+
+      if (!roles || !roles.includes("USER") || roles.length === 1) {
+        // Nếu chỉ có role USER, điều hướng về trang chính
+        router.push("/403page");
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      router.push("/auth");
+    }
+  }, [router]);
+
 
   return (
     <div className="container-custom mx-auto p-4">

@@ -109,3 +109,4 @@ const adminApiRequests = {
       }),
   },
 };
+export default adminApiRequests;

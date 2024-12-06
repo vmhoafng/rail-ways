@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
+// Định nghĩa kiểu dữ liệu TrainInfo
 interface TrainInfo {
   trainId: string;
   departureStationName: string;
@@ -10,20 +11,40 @@ interface TrainInfo {
   arrivalTime: string;
   duration: string;
   trainType: string;
-  availableSeats: string[]; // Dữ liệu ghế còn trống chi tiết
+  railcars: Railcar[]; // Thông tin các toa tàu
   selectedSeats: string[]; // Danh sách ghế đã chọn
 }
 
+// Định nghĩa kiểu dữ liệu Railcar (toa tàu)
+interface Railcar {
+  railcarName: string;
+  railcarType: string; // Loại toa tàu
+  totalSeat: number; // Tổng số ghế
+  totalSeatAvailable: number; // Số ghế còn trống
+  seats: Seat[]; // Danh sách ghế
+}
+
+// Định nghĩa kiểu dữ liệu Seat (ghế)
+interface Seat {
+  id: number;
+  seatNumber: string;
+  isAvailable: boolean; // Trạng thái ghế (trống hoặc đã đặt)
+  price: number; // Giá vé
+}
+
+// Định nghĩa kiểu dữ liệu của context
 interface SeatsContextType {
   trains: TrainInfo[];
-  updateTrain: (trainInfo: TrainInfo) => void;
-  getTrainInfo: (trainId: string) => TrainInfo | undefined;
-  updateSelectedSeats: (trainId: string, selectedSeats: string[]) => void;
-  clearTrainInfo: (trainId: string) => void;
+  setTrains: (trains: TrainInfo[]) => void; // Đặt danh sách chuyến tàu
+  updateTrain: (trainInfo: TrainInfo) => void; // Cập nhật thông tin chuyến tàu
+  getTrainInfo: (trainId: string) => TrainInfo | undefined; // Lấy thông tin chuyến tàu
+  updateSelectedSeats: (trainId: string, selectedSeats: string[]) => void; // Cập nhật ghế đã chọn
+  clearTrainInfo: (trainId: string) => void; // Xóa thông tin chuyến tàu
 }
 
 const SeatsContext = createContext<SeatsContextType | undefined>(undefined);
 
+// Custom hook để sử dụng SeatsContext
 export const useSeatsContext = () => {
   const context = useContext(SeatsContext);
   if (!context) {
@@ -32,13 +53,12 @@ export const useSeatsContext = () => {
   return context;
 };
 
-export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+// Provider để bọc ứng dụng
+export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trains, setTrains] = useState<TrainInfo[]>([]);
 
+  // Load dữ liệu từ localStorage khi ứng dụng khởi chạy
   useEffect(() => {
-    // Load train info from localStorage on initial render
     const storedTrains = localStorage.getItem("trainInfo");
     if (storedTrains) {
       try {
@@ -49,8 +69,8 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  // Lưu dữ liệu vào localStorage khi trains thay đổi
   useEffect(() => {
-    // Save train info to localStorage whenever it changes
     try {
       localStorage.setItem("trainInfo", JSON.stringify(trains));
     } catch (error) {
@@ -58,42 +78,42 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [trains]);
 
+  // Đặt toàn bộ danh sách chuyến tàu (ví dụ: từ API)
+  const setTrainsHandler = (newTrains: TrainInfo[]) => {
+    setTrains(newTrains);
+  };
+
+  // Cập nhật thông tin của một chuyến tàu
   const updateTrain = (trainInfo: TrainInfo) => {
     setTrains((prevTrains) => {
-      const existingTrainIndex = prevTrains.findIndex(
-        (t) => t.trainId === trainInfo.trainId
-      );
+      const existingTrainIndex = prevTrains.findIndex((t) => t.trainId === trainInfo.trainId);
       if (existingTrainIndex >= 0) {
-        // Update existing train info
-        const newTrains = [...prevTrains];
-        newTrains[existingTrainIndex] = trainInfo;
-        return newTrains;
-      } else {
-        // Add new train info
-        return [...prevTrains, trainInfo];
+        const updatedTrains = [...prevTrains];
+        updatedTrains[existingTrainIndex] = trainInfo;
+        return updatedTrains;
       }
+      return [...prevTrains, trainInfo];
     });
   };
 
+  // Lấy thông tin chuyến tàu dựa trên trainId
   const getTrainInfo = (trainId: string): TrainInfo | undefined => {
     return trains.find((t) => t.trainId === trainId);
   };
 
+  // Cập nhật danh sách ghế đã chọn của một chuyến tàu
   const updateSelectedSeats = (trainId: string, selectedSeats: string[]) => {
-    setTrains((prevTrains) => {
-      return prevTrains.map((train) => {
+    setTrains((prevTrains) =>
+      prevTrains.map((train) => {
         if (train.trainId === trainId) {
-          const updatedTrain = {
-            ...train,
-            selectedSeats,
-          };
-          return updatedTrain;
+          return { ...train, selectedSeats };
         }
         return train;
-      });
-    });
+      })
+    );
   };
 
+  // Xóa thông tin của một chuyến tàu
   const clearTrainInfo = (trainId: string) => {
     setTrains((prevTrains) => prevTrains.filter((t) => t.trainId !== trainId));
   };
@@ -102,6 +122,7 @@ export const SeatsProvider: React.FC<{ children: React.ReactNode }> = ({
     <SeatsContext.Provider
       value={{
         trains,
+        setTrains: setTrainsHandler,
         updateTrain,
         getTrainInfo,
         updateSelectedSeats,

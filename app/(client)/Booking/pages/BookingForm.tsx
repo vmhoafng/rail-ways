@@ -22,6 +22,7 @@ export default function BookingForm() {
     const [step, setStep] = useState(1)
     const [selectedSeats, setSelectedSeats] = useState<string[]>([])
 
+
     const handleSeatSelect = (seatNumber: number) => {
         setSelectedSeat(seatNumber)
         setPrice(150000)

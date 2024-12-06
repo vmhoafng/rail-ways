@@ -17,6 +17,7 @@ import searchApiRequest from "@/app/apiRequests/search";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Railcar } from "@/app/interfaces";
 
 
 interface TrainJourney {
@@ -26,8 +27,9 @@ interface TrainJourney {
   departureTime: string;
   arrivalTime: string;
   trainName: string;
-  seatNumbersAvailable: string[];
+  railcars: Railcar[]; // Thêm railcars
 }
+
 
 // const trainJourneyData: TrainJourney = {
 //   id: TrainJourney.id,
@@ -58,14 +60,23 @@ const TrainSearchPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const journey: any = await searchApiRequest.search.getScheduleByInfos({
+        const response = await searchApiRequest.search.getScheduleByInfos({
           departureStation: departureStation,
           arrivalStation: arrivalStation,
           departureTime: departureTime,
           arrivalTime: arrivalTime,
         });
-        console.log(journey.payload);
-        setJourney(journey.payload.result);
+        const result = response.payload.result.map((train: any) => ({
+          id: train.id,
+          departureStationName: train.departureStationName,
+          arrivalStationName: train.arrivalStationName,
+          departureTime: train.departureTime,
+          arrivalTime: train.arrivalTime,
+          trainName: train.trainName,
+          railcars: train.railcars, // Đảm bảo có dữ liệu railcars
+        }));
+
+        setJourney(result);
       } catch (error) {
         setError("Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau.");
       } finally {
@@ -147,12 +158,12 @@ const TrainSearchPage = () => {
                   key={train.id}
                   departureStationName={train.departureStationName}
                   arrivalStationName={train.arrivalStationName}
-                  availableSeats={train.seatNumbersAvailable}
                   trainId={train.id}
                   departureTime={format(new Date(train.departureTime), "dd 'Tháng' MM, yyyy HH:mm", { locale: vi })}
                   arrivalTime={format(new Date(train.arrivalTime), "dd 'Tháng' MM, yyyy HH:mm", { locale: vi })}
                   duration={duration(train.departureTime, train.arrivalTime)}
                   trainType={train.trainName}
+                  railcars={train.railcars}
                   journeyType={activeTab}
                   setActiveTab={setActiveTab}
                 />

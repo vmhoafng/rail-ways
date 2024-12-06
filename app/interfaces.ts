@@ -138,6 +138,7 @@ export interface Seat {
   id: number;
   seatNumber: string;
   isAvailable: boolean;
+  price: number;
 }
 
 // Interface cho toa tàu (Railcar)

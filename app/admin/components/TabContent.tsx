@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import DataTable from "./DataTable";
 import { tabContent, TabContentProps } from "../page";
+import adminApiRequests from "@/app/apiRequests/admin";
 
 
 const TabContent: React.FC<TabContentProps> = ({ tab }) => {

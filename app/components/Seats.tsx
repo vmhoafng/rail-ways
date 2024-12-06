@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Train } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useSeatsContext } from "../context/SeatsContext";
 
 interface SeatProps {
@@ -13,26 +13,32 @@ interface SeatProps {
   onSelect: (seatNumber: string) => void;
 }
 
-const Seat: React.FC<SeatProps> = ({
-  trainId,
-  number,
-  isAvailable,
-  isSelected,
-  onSelect,
-}) => (
+const Seat = ({ trainId, number, isAvailable, isSelected, onSelect }: SeatProps) => (
   <button
     className={cn(
-      "size-10 m-0.5 sm:m-1 text-xs sm:text-sm font-semibold rounded-t-lg border-2",
-      isAvailable &&
-        !isSelected &&
-        "bg-white text-blue-600 border-blue-600 hover:bg-blue-100",
-      isSelected && "bg-blue-600 text-white border-blue-800",
-      !isAvailable &&
-        "bg-orange-500 text-white border-orange-700 cursor-not-allowed"
+      "relative w-8 h-6 m-0.5 text-xs font-medium rounded-t-lg transition-colors", // h-6: giảm chiều cao
+      "before:absolute before:bottom-0 before:left-0 before:right-0 before:h-1 before:bg-current before:opacity-20",
+      isAvailable && !isSelected && "bg-white text-blue-600 hover:bg-blue-50 border border-blue-200",
+      isSelected && "bg-blue-600 text-white border border-blue-700",
+      !isAvailable && "bg-orange-500 text-white cursor-not-allowed"
     )}
     onClick={() => isAvailable && onSelect(number)}
-    disabled={!isAvailable}>
+    disabled={!isAvailable}
+  >
     {number.split(".")[1]}
+  </button>
+);
+
+const TrainCar = ({ number, isSelected, onClick }: { number: string; isSelected: boolean; onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "group relative flex items-center gap-1 px-3 py-2 rounded-lg transition-colors",
+      isSelected ? "bg-blue-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"
+    )}
+  >
+    <Train className="w-4 h-4" />
+    <span className="font-medium">{number}</span>
   </button>
 );
 
@@ -43,17 +49,13 @@ interface SeatsProps {
 export default function Seats({ trainId }: SeatsProps) {
   const [selectedCar, setSelectedCar] = useState("SE1");
   const { getTrainInfo, updateSelectedSeats } = useSeatsContext();
-  const [currentAvailableSeats, setCurrentAvailableSeats] = useState<string[]>(
-    []
-  );
+  const [currentAvailableSeats, setCurrentAvailableSeats] = useState<string[]>([]);
 
   const trainInfo = getTrainInfo(trainId);
 
   useEffect(() => {
     if (trainInfo) {
-      setCurrentAvailableSeats(
-        trainInfo.availableSeats.filter((seat) => seat.startsWith(selectedCar))
-      );
+      setCurrentAvailableSeats(trainInfo.availableSeats.filter((seat) => seat.startsWith(selectedCar)));
     }
   }, [selectedCar, trainInfo]);
 
@@ -67,7 +69,7 @@ export default function Seats({ trainId }: SeatsProps) {
   };
 
   const renderSeatRow = (start: number, end: number) => (
-    <div className="flex flex-col">
+    <div className="grid grid-cols-8 gap-y-1 gap-x-2 justify-center"> {/* gap-y-1: giảm khoảng cách giữa hàng */}
       {[...Array(end - start + 1)].map((_, index) => {
         const seatNumber = `${selectedCar}.${start + index}`;
         return (
@@ -88,67 +90,74 @@ export default function Seats({ trainId }: SeatsProps) {
     return <div>Train information not found.</div>;
   }
 
+  const cars = ["SE1", "SE2", "SE3", "SE4", "SE5", "SE6", "SE7", "SE8", "SE9", "SE10", "SE11", "SE12"];
+
   return (
-    <div className="max-w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto p-2 sm:p-4">
-      <div className="w-full flex justify-center space-x-1 sm:space-x-2 mb-4 sm:mb-8 pb-2">
-        <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
-        <div className="overflow-x-scroll w-full flex gap-2">
-          {["SE1", "SE2"].map((car) => (
-            <button
-              key={car}
-              onClick={() => setSelectedCar(car)}
-              className={cn(
-                "min-w-12 h-8 p-3 sm:w-14 sm:h-9 md:w-16 md:h-10 flex items-center justify-center text-xs font-semibold rounded-sm",
-                car === selectedCar
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              )}>
-              {car}
-            </button>
-          ))}
+    <div className="max-w-6xl mx-auto p-4 space-y-6">
+      {/* Train car selector */}
+      <div className="relative flex items-center">
+        <button className="p-2 text-gray-400 hover:text-gray-600">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="flex-1 overflow-x-auto">
+          <div className="flex gap-2 px-2">
+            {cars.map((car) => (
+              <TrainCar key={car} number={car} isSelected={car === selectedCar} onClick={() => setSelectedCar(car)} />
+            ))}
+          </div>
         </div>
-        <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+        <button className="p-2 text-gray-400 hover:text-gray-600">
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
 
-      <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">
-        Toa số {selectedCar}: Ngồi mềm điều hòa
-      </h2>
+      {/* Car title */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900">Toa số {selectedCar}</h2>
+        <p className="text-sm text-gray-500">Ngồi mềm điều hòa - 64 ghế</p>
+      </div>
 
-      <div className="border-2 sm:border-4 border-gray-300 rounded-lg p-2 sm:p-4 bg-gray-100 overflow-x-scroll">
-        <div className="lg:flex w-full justify-between items-center mb-2 sm:mb-4 hidden">
-          <div className="w-8 h-6 sm:w-12 sm:h-8 md:w-16 md:h-10 bg-gray-400 rounded-r-full"></div>
-          <div className="w-8 h-6 sm:w-12 sm:h-8 md:w-16 md:h-10 bg-gray-400 rounded-l-full"></div>
-        </div>
-        <div className="flex justify-between min-w-fit">
-          <div className="flex w-1/2 justify-evenly">
-            {renderSeatRow(1, 4)}
-            {renderSeatRow(9, 12)}
-            {renderSeatRow(17, 20)}
-            {renderSeatRow(25, 28)}
+      {/* Seating layout */}
+      <div className="relative border rounded-xl bg-gray-50 p-6 transform scale-y-90"> {/* scale-y-90: thu nhỏ chiều dọc */}
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-16 bg-gray-200 rounded-r-full" />
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-16 bg-gray-200 rounded-l-full" />
+
+        {/* Seats grid */}
+        <div className="flex flex-col max-w-5xl mx-auto">
+          <div className="flex flex-col">
+            {renderSeatRow(1, 16)}
+            {renderSeatRow(17, 32)}
           </div>
-          <div
-            className="w-4 sm:w-6 md:w-8 bg-gray-200 mx-1 sm:mx-2"
-            aria-label="Lối đi"></div>
-          <div className="flex w-1/2 justify-evenly">
-            {renderSeatRow(5, 8)}
-            {renderSeatRow(13, 16)}
-            {renderSeatRow(21, 24)}
-            {renderSeatRow(29, 32)}
+          <div className="h-6 bg-gray-200 my-2 rounded" aria-label="Lối đi" />
+          <div className="flex flex-col">
+            {renderSeatRow(33, 48)}
+            {renderSeatRow(49, 64)}
           </div>
-        </div>
-        <div className="lg:flex justify-between items-center mt-2 sm:mt-4 hidden">
-          <div className="w-8 h-6 sm:w-12 sm:h-8 md:w-16 md:h-10 bg-gray-400 rounded-r-full"></div>
-          <div className="w-8 h-6 sm:w-12 sm:h-8 md:w-16 md:h-10 bg-gray-400 rounded-l-full"></div>
         </div>
       </div>
 
-      <div className="mt-2 sm:mt-4">
-        <h3 className="font-semibold">Ghế đã chọn:</h3>
-        <p>
-          {trainInfo.selectedSeats.length > 0
-            ? trainInfo.selectedSeats.join(", ")
-            : "Chưa chọn"}
+      {/* Selected seats */}
+      <div className="p-4 bg-white rounded-lg border">
+        <h3 className="font-medium text-gray-900">Ghế đã chọn</h3>
+        <p className="mt-1 text-gray-600">
+          {trainInfo.selectedSeats.length > 0 ? trainInfo.selectedSeats.join(", ") : "Chưa chọn ghế nào"}
         </p>
+      </div>
+
+      {/* Legend */}
+      <div className="flex gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-white border border-blue-200" />
+          <span>Còn trống</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-blue-600" />
+          <span>Đã chọn</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-orange-500" />
+          <span>Đã đặt</span>
+        </div>
       </div>
     </div>
   );

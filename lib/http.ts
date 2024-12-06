@@ -211,7 +211,7 @@ const http = {
     url: string,
     options?: Omit<CustomOptions, "body"> | undefined
   ) {
-    return request<Response>("GET", url, { ...options, body });
+    return request<Response>("GET", url, options);
   },
   post<Response>(
     url: string,

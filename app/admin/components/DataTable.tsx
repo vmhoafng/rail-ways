@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 import { Pencil } from "lucide-react";
 import ItemDialog from "./ItemDialog";
+import removeAccents from "./removeAccents";
 
 interface DataTableProps {
   fields: string[];

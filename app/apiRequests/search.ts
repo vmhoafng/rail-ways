@@ -12,7 +12,7 @@ const searchApiRequest = {
     getScheduleByInfos: (params: {
       departureStation: string;
       arrivalStation: string;
-      departureTime?: string;
+      departureTime?: any;
     }) => {
       const queryParams = new URLSearchParams(params).toString();
       return http.get<getAllResponse>(

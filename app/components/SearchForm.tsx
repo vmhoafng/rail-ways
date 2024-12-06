@@ -16,8 +16,6 @@ import { AlertCircle, ArrowRightLeft } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useStations } from "../context/StationsContext";
-import { apiService } from "../../lib/apiService";
 import searchApiRequest from "../apiRequests/search";
 import { Station } from "../interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,11 +25,17 @@ export default function SearchForm() {
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filteredFromStations, setFilteredFromStations] = useState<Station[]>(
+    []
+  );
+  const [filteredToStations, setFilteredToStations] = useState<Station[]>([]);
   useEffect(() => {
     const fetchStations = async () => {
       try {
         const station = await searchApiRequest.search.getAllStations();
         setStations(station.payload.result);
+        setFilteredFromStations(station.payload.result);
+        setFilteredToStations(station.payload.result);
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch train data");
@@ -41,16 +45,22 @@ export default function SearchForm() {
 
     fetchStations();
   }, []);
-
+  const formattedDate = new Date()
+    .toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }) // Convert to local time
+    .replace(/,/, "T") // Replace comma with T
+    .split("/")
+    .join("-");
   const searchParams = useSearchParams();
   const [from, setFrom] = useState(searchParams.get("departureStation") || "");
   const [to, setTo] = useState(searchParams.get("arrivalStation") || "");
   const { openMenus, toggleMenu, closeAllMenus } = useDropdownMenu();
   const [date, setDate] = React.useState<Date | any>(
-    new Date(+searchParams.get("departureTime")! || Date.now())
+    new Date(searchParams.get("departureTime")! || Date.now())
   );
+  console.log(date);
+
   const [returnDate, setReturnDate] = React.useState<Date | any>(
-    new Date(+searchParams.get("arrivalTime")! || Date.now())
+    new Date(searchParams.get("arrivalTime")! || Date.now())
   );
   const ValiDate = (day: Date) =>
     isBefore(day, startOfToday()) || (date ? isBefore(day, date) : false);
@@ -68,7 +78,7 @@ export default function SearchForm() {
       const formData = {
         departureStation: from,
         arrivalStation: to,
-        departureTime: date && date.getTime(),
+        departureTime: date?.toISOString().replace("Z", "+07:00"),
       };
       router.push(
         `/search?departureStation=${encodeURIComponent(
@@ -76,7 +86,7 @@ export default function SearchForm() {
         )}&arrivalStation=${encodeURIComponent(
           formData.arrivalStation
         )}&trip=${encodeURIComponent("one-way")}
-        &departureTime=${encodeURIComponent(formData.departureTime)}`
+        &departureTime=${encodeURIComponent(date)}`
       );
       try {
         // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
@@ -110,7 +120,18 @@ export default function SearchForm() {
 
     // Gửi dữ liệu hoặc thực hiện hành động tiếp theo
   };
-
+  const filterStations = (input: string, type: "from" | "to") => {
+    const filtered = stations.filter(
+      (station) =>
+        station.name.toLowerCase().includes(input.toLowerCase()) &&
+        (type === "from" ? station.name !== to : station.name !== from)
+    );
+    if (type === "from") {
+      setFilteredFromStations(filtered);
+    } else {
+      setFilteredToStations(filtered);
+    }
+  };
   return (
     <div className="w-full bg-white shadow-lg rounded-lg">
       <div className="p-5 rounded-b-md">
@@ -178,7 +199,10 @@ export default function SearchForm() {
                     }}
                     id="from"
                     value={from}
-                    onChange={(e) => setFrom(e.target.value)}
+                    onChange={(e) => {
+                      setFrom(e.target.value);
+                      filterStations(e.target.value, "from");
+                    }}
                     className="block w-full ring-0 border-0 focus:focus-visible:ring-orange-600 shadow-none h-14 pt-5 font-semibold focus:bg-white"
                   />
                   {openMenus["from"] && (
@@ -203,34 +227,22 @@ export default function SearchForm() {
                             <AlertTitle>Lỗi</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
                           </Alert>
-                        ) : stations ? (
-                          stations
-                            .filter((station) => station.name !== to)
-                            .map((station, index) => (
-                              <li
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFrom(station.name);
-                                  refFrom.current?.blur();
-                                  closeAllMenus();
-                                }}
-                                key={index}
-                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                                {station.name}
-                              </li>
-                            ))
                         ) : (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            Không tải được dữ liệu
-                          </li>
+                          filteredFromStations.length > 0 &&
+                          filteredFromStations.map((station, index) => (
+                            <li
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setFrom(station.name);
+                                refFrom.current?.blur();
+                                closeAllMenus();
+                              }}
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              {station.name}
+                            </li>
+                          ))
                         )}
                       </ul>
                     </div>
@@ -265,7 +277,10 @@ export default function SearchForm() {
                     }}
                     id="to"
                     value={to}
-                    onChange={(e) => setTo(e.target.value)}
+                    onChange={(e) => {
+                      setTo(e.target.value);
+                      filterStations(e.target.value, "to");
+                    }}
                     className="lg:pl-7 block w-full ring-0 border-0 focus:focus-visible:ring-orange-600 shadow-none h-14 pt-5 font-semibold focus:bg-white"
                   />
                   {openMenus["to"] && (
@@ -288,34 +303,22 @@ export default function SearchForm() {
                             <AlertTitle>Lỗi</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
                           </Alert>
-                        ) : stations ? (
-                          stations
-                            .filter((station) => station.name !== from)
-                            .map((station, index) => (
-                              <li
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setTo(station.name);
-                                  refTo.current?.blur();
-                                  closeAllMenus();
-                                }}
-                                key={index}
-                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                                {station.name}
-                              </li>
-                            ))
                         ) : (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            Không tải được dữ liệu
-                          </li>
+                          filteredToStations.length > 0 &&
+                          filteredToStations.map((station, index) => (
+                            <li
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setTo(station.name);
+                                refTo.current?.blur();
+                                closeAllMenus();
+                              }}
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              {station.name}
+                            </li>
+                          ))
                         )}
                       </ul>
                     </div>
@@ -353,7 +356,9 @@ export default function SearchForm() {
                     disabled={(day) => isBefore(day, startOfToday())}
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={(selectedDate) => {
+                      setDate(selectedDate); // Set the selected date
+                    }}
                     initialFocus
                     className="w-full"
                   />
@@ -426,7 +431,9 @@ export default function SearchForm() {
                       disabled={(day) => ValiDate(day)}
                       mode="single"
                       selected={returnDate}
-                      onSelect={setReturnDate}
+                      onSelect={(selectedDate) => {
+                        setReturnDate(selectedDate); // Set the selected date
+                      }}
                       initialFocus
                       className="w-full"
                     />

@@ -14,6 +14,8 @@ interface TrainOptionProps {
   trainId: string;
   departureTime: string;
   arrivalTime: string;
+  departureStationName: string;
+  arrivalStationName: string;
   duration: string;
   price: number;
   trainType: string;

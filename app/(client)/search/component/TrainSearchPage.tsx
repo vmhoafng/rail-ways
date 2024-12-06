@@ -49,18 +49,24 @@ const TrainSearchPage = () => {
   const departureStation = searchParams.get("departureStation")!;
   const arrivalStation = searchParams.get("arrivalStation")!;
   const arrivalTime = searchParams.get("arrivalTime")!;
-  const departureTime = searchParams.get("departureTime")!;
+  const departureTime = new Date(+searchParams.get("departureTime")!);
 
   useEffect(() => {
     const fetchStations = async () => {
       try {
         setLoading(true);
         setError(null);
+        console.log({
+          departureStation: departureStation,
+          arrivalStation: arrivalStation,
+          departureTime: departureTime,
+        });
         const journey: any = await searchApiRequest.search.getScheduleByInfos({
           departureStation: departureStation,
           arrivalStation: arrivalStation,
+          departureTime: departureTime,
         });
-        console.log(journey.payload);
+       
         setJourney(journey.payload.result);
       } catch (error) {
         setError("Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau.");
@@ -134,6 +140,8 @@ const TrainSearchPage = () => {
                   key={train.id}
                   availableSeats={trainJourneyData.seatNumbersAvailable}
                   trainId={train.id}
+                  departureStationName={train.departureStationName}
+                  arrivalStationName={train.arrivalStationName}
                   departureTime={train.departureTime}
                   arrivalTime={train.arrivalTime}
                   duration="2 giờ 16 phút"

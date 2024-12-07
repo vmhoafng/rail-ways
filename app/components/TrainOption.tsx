@@ -13,10 +13,10 @@ import { Railcar } from "@/app/interfaces";
 
 interface TrainOptionProps {
   trainId: string;
-  departureStationName: string;
-  arrivalStationName: string;
   departureTime: string;
   arrivalTime: string;
+  departureStationName: string;
+  arrivalStationName: string;
   duration: string;
   trainType: string;
   railcars: Railcar[]; // Cập nhật thông tin railcars

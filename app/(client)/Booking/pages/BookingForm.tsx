@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -23,15 +23,46 @@ import { useSearchParams } from "next/navigation";
 import { useSeatsContext } from "@/app/context/SeatsContext";
 
 export default function BookingForm() {
+  const { getTrainInfo, updateSelectedSeats, trains } = useSeatsContext();
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-  const { getTrainInfo, updateSelectedSeats,trains } = useSeatsContext();
   const searchParams = useSearchParams();
-  console.log(trains);
-
+  const trainID = searchParams.get("trainID");
+  const [schedule, setSchedule] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [customerInfo, setCustomerInfo] = useState({});
   const [price, setPrice] = useState(0);
   const [step, setStep] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const fetchSchedule = async (id: any) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/schedule/anonymous/get-schedule/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${
+              localStorage.getItem("accessToken") || ""
+            }`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setSchedule(data); // Adjust this based on your API's response structure
+    } catch (err) {
+      console.error(err);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchSchedule(13);
+  }, []);
+  console.log(trains, schedule);
 
   const handleSeatSelect = (seatNumber: number) => {
     setSelectedSeat(seatNumber);

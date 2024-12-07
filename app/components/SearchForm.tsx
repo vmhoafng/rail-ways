@@ -16,8 +16,6 @@ import { AlertCircle, ArrowRightLeft } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import useDropdownMenu from "../hooks/useDropDown";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useStations } from "../context/StationsContext";
-import { apiService } from "../../lib/apiService";
 import searchApiRequest from "../apiRequests/search";
 import { Railcar, Station } from "../interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,6 +31,8 @@ export default function SearchForm() {
       try {
         const station = await searchApiRequest.search.getAllStations();
         setStations(station.payload.result);
+        setFilteredFromStations(station.payload.result);
+        setFilteredToStations(station.payload.result);
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch train data");
@@ -42,7 +42,11 @@ export default function SearchForm() {
 
     fetchStations();
   }, []);
-
+  const formattedDate = new Date()
+    .toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }) // Convert to local time
+    .replace(/,/, "T") // Replace comma with T
+    .split("/")
+    .join("-");
   const searchParams = useSearchParams();
   const [from, setFrom] = useState(searchParams.get("departureStation") || "");
   const [to, setTo] = useState(searchParams.get("arrivalStation") || "");
@@ -73,18 +77,7 @@ export default function SearchForm() {
     []
   );
   const [filteredToStations, setFilteredToStations] = useState<Station[]>([]);
-  const filterStations = (input: string, type: "from" | "to") => {
-    const filtered = stations.filter(
-      (station) =>
-        station.name.toLowerCase().includes(input.toLowerCase()) &&
-        (type === "from" ? station.name !== to : station.name !== from)
-    );
-    if (type === "from") {
-      setFilteredFromStations(filtered);
-    } else {
-      setFilteredToStations(filtered);
-    }
-  };
+
   const handleSubmit = () => {
     const formData = {
       departureStation: from,
@@ -194,7 +187,18 @@ export default function SearchForm() {
 
     // Gửi dữ liệu hoặc thực hiện hành động tiếp theo
   };
-
+  const filterStations = (input: string, type: "from" | "to") => {
+    const filtered = stations.filter(
+      (station) =>
+        station.name.toLowerCase().includes(input.toLowerCase()) &&
+        (type === "from" ? station.name !== to : station.name !== from)
+    );
+    if (type === "from") {
+      setFilteredFromStations(filtered);
+    } else {
+      setFilteredToStations(filtered);
+    }
+  };
   return (
     <div className="w-full bg-white shadow-lg rounded-lg">
       <div className="p-5 rounded-b-md">
@@ -290,34 +294,22 @@ export default function SearchForm() {
                             <AlertTitle>Lỗi</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
                           </Alert>
-                        ) : stations ? (
-                          stations
-                            .filter((station) => station.name !== to)
-                            .map((station, index) => (
-                              <li
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setFrom(station.name);
-                                  refFrom.current?.blur();
-                                  closeAllMenus();
-                                }}
-                                key={index}
-                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                                {station.name}
-                              </li>
-                            ))
                         ) : (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            Không tải được dữ liệu
-                          </li>
+                          filteredFromStations.length > 0 &&
+                          filteredFromStations.map((station, index) => (
+                            <li
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setFrom(station.name);
+                                refFrom.current?.blur();
+                                closeAllMenus();
+                              }}
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              {station.name}
+                            </li>
+                          ))
                         )}
                       </ul>
                     </div>
@@ -378,34 +370,22 @@ export default function SearchForm() {
                             <AlertTitle>Lỗi</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
                           </Alert>
-                        ) : stations ? (
-                          stations
-                            .filter((station) => station.name !== from)
-                            .map((station, index) => (
-                              <li
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setTo(station.name);
-                                  refTo.current?.blur();
-                                  closeAllMenus();
-                                }}
-                                key={index}
-                                className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                                {station.name}
-                              </li>
-                            ))
                         ) : (
-                          <li
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              refFrom.current?.blur();
-                              closeAllMenus();
-                            }}
-                            className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
-                            Không tải được dữ liệu
-                          </li>
+                          filteredToStations.length > 0 &&
+                          filteredToStations.map((station, index) => (
+                            <li
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setTo(station.name);
+                                refTo.current?.blur();
+                                closeAllMenus();
+                              }}
+                              key={index}
+                              className="flex items-center justify-between text-gray-600 hover:text-gray-900 cursor-pointer">
+                              {station.name}
+                            </li>
+                          ))
                         )}
                       </ul>
                     </div>
@@ -443,7 +423,9 @@ export default function SearchForm() {
                     disabled={(day) => isBefore(day, startOfToday())}
                     mode="single"
                     selected={date}
-                    onSelect={setDate}
+                    onSelect={(selectedDate) => {
+                      setDate(selectedDate); // Set the selected date
+                    }}
                     initialFocus
                     className="w-full"
                   />
@@ -517,7 +499,7 @@ export default function SearchForm() {
                       mode="single"
                       selected={returnDate}
                       onSelect={(selectedDate) => {
-                        setReturnDate(selectedDate); // Set the return date if needed
+                        setReturnDate(selectedDate); // Set the selected date
                       }}
                       initialFocus
                       className="w-full"

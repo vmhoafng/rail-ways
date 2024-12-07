@@ -18,7 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Railcar } from "@/app/interfaces";
-
+import { useScheduleContext } from "@/app/context/ScheduleContext";
+import { scheduler } from "timers/promises";
 
 interface TrainJourney {
   id: string;
@@ -29,7 +30,6 @@ interface TrainJourney {
   trainName: string;
   railcars: Railcar[]; // Thêm railcars
 }
-
 
 // const trainJourneyData: TrainJourney = {
 //   id: TrainJourney.id,
@@ -45,46 +45,9 @@ const TrainSearchPage = () => {
   const [timePicked, setTimePicked] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const { returnTrainId, outboundTrainId } = useJourneyContext();
-  const [journey, setJourney] = useState<TrainJourney[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const departureStation = searchParams.get("departureStation")!;
-  const arrivalStation = searchParams.get("arrivalStation")!;
-  const arrivalTime = searchParams.get("arrivalTime")!;
-  const departureTime = searchParams.get("departureTime")!;
-
-
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await searchApiRequest.search.getScheduleByInfos({
-          departureStation: departureStation,
-          arrivalStation: arrivalStation,
-          departureTime: departureTime,
-          arrivalTime: arrivalTime,
-        });
-        const result = response.payload.result.map((train: any) => ({
-          id: train.id,
-          departureStationName: train.departureStationName,
-          arrivalStationName: train.arrivalStationName,
-          departureTime: train.departureTime,
-          arrivalTime: train.arrivalTime,
-          trainName: train.trainName,
-          railcars: train.railcars, // Đảm bảo có dữ liệu railcars
-        }));
-
-        setJourney(result);
-      } catch (error) {
-        setError("Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStations();
-  }, [departureStation, arrivalStation]);
+  const { schedule, loading, error } = useScheduleContext();
+  console.log(schedule);
 
   useEffect(() => {
     if (!outboundTrainId) setActiveTab("outbound");
@@ -113,7 +76,6 @@ const TrainSearchPage = () => {
     const minutes = totalMinutes % 60; // Số phút
     return `${hours} giờ ${minutes} phút`;
   };
-
   return (
     <JourneyProvider>
       <ActiveTrainProvider>
@@ -152,25 +114,52 @@ const TrainSearchPage = () => {
                 <AlertTitle>Lỗi</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
-            ) : journey && journey.length > 0 ? (
-              journey.map((train: TrainJourney) => (
+            ) : schedule.length > 0 && activeTab === "outbound" ? (
+              schedule[0]?.map((train: TrainJourney) => (
                 <TrainOption
                   key={train.id}
                   departureStationName={train.departureStationName}
                   arrivalStationName={train.arrivalStationName}
                   trainId={train.id}
-                  departureTime={format(new Date(train.departureTime), "dd 'Tháng' MM, yyyy HH:mm", { locale: vi })}
-                  arrivalTime={format(new Date(train.arrivalTime), "dd 'Tháng' MM, yyyy HH:mm", { locale: vi })}
+                  departureTime={format(
+                    new Date(train.departureTime),
+                    "HH:mm",
+                    { locale: vi }
+                  )}
+                  arrivalTime={format(
+                    new Date(train.arrivalTime),
+                    "HH:mm",
+                    { locale: vi }
+                  )}
                   duration={duration(train.departureTime, train.arrivalTime)}
                   trainType={train.trainName}
                   railcars={train.railcars}
                   journeyType={activeTab}
                   setActiveTab={setActiveTab}
                 />
-
               ))
             ) : (
-              <p className="text-gray-600">Không tìm được chuyến đi.</p>
+              schedule[1]?.map((train: TrainJourney) => (
+                <TrainOption
+                  key={train.id}
+                  departureStationName={train.departureStationName}
+                  arrivalStationName={train.arrivalStationName}
+                  trainId={train.id}
+                  departureTime={format(
+                    new Date(train.departureTime),
+                    "HH:mm",
+                    { locale: vi }
+                  )}
+                  arrivalTime={format(new Date(train.arrivalTime), "HH:mm", {
+                    locale: vi,
+                  })}
+                  duration={duration(train.departureTime, train.arrivalTime)}
+                  trainType={train.trainName}
+                  railcars={train.railcars}
+                  journeyType={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+              ))
             )}
           </div>
         </div>

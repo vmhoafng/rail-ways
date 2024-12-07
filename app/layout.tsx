@@ -6,7 +6,6 @@ import AppProvider from "./AppProvider";
 import { cookies } from "next/headers";
 import { Toaster } from "@/components/ui/toaster";
 import { UserProvider } from "@/contexts/UserContext";
-import { SeatsProvider } from "./context/SeatsContext";
 import { Montserrat } from "next/font/google";
 import { StationsProvider } from "./context/StationsContext";
 import { JourneyProvider } from "./context/JourneyContext";

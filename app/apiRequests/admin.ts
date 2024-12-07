@@ -9,14 +9,20 @@ import {
   createTrainBodyType,
   createTrainResponse,
   deleteUserBodyType,
+  GetAllRailCarResponse,
+  getAllStationsResponse,
   getAllTicketsResponse,
+  GetAllTrainBasicResponse,
+  getAllUsersResponse,
+  getUserByIdResponse,
+  UpdateProfileResponse,
   updateUserBodyType,
 } from "../interfaces";
 
 const adminApiRequests = {
   train: {
-    getAll: (accessToken: string | undefined) =>
-      http.get("/api/v1/train/get-all", {
+    getAll: (accessToken: string | null) =>
+      http.get<GetAllTrainBasicResponse>("/api/v1/train/get-all", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -31,7 +37,7 @@ const adminApiRequests = {
   },
   railCar: {
     getAll: (accessToken: string | undefined) =>
-      http.get("/api/v1/railcar/get-all", {
+      http.get<GetAllRailCarResponse>("/api/v1/railcar/get-all", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -51,11 +57,12 @@ const adminApiRequests = {
         body,
         headers: { Authorization: `Bearer ${accessToken}` },
       }),
-    getAll: () => http.get("/api/v1/station/anonymous/get-all"),
+    getAll: () =>
+      http.get<getAllStationsResponse>("/api/v1/station/anonymous/get-all"),
   },
   ticket: {
     getAll: (accessToken: string | undefined) => {
-      http.get<getAllTicketsResponse>("/api/v1/ticket/get-all", {
+      return http.get<getAllTicketsResponse>("/api/v1/ticket/get-all", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -71,21 +78,21 @@ const adminApiRequests = {
   },
   user: {
     getAll: (accessToken: string | undefined) => {
-      http.get(`/api/v1/auth/get-all-user`, {
+      return http.get<getAllUsersResponse>(`/api/v1/auth/get-all-user`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
     },
     getUserById: (accessToken: string | undefined, userId: string) => {
-      http.get(`/api/v1/auth/get-by-id/${userId}`, {
+      return http.get<getUserByIdResponse>(`/api/v1/auth/get-by-id/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
     },
     update: (body: updateUserBodyType, accessToken: string | undefined) => {
-      http.post(`/api/v1/auth/update-user`, {
+      http.post<UpdateProfileResponse>(`/api/v1/auth/update-user`, {
         body,
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -93,7 +100,7 @@ const adminApiRequests = {
       });
     },
     delete: (body: deleteUserBodyType, accessToken: string | undefined) => {
-      http.post(`/api/v1/auth/hard-delete`, {
+      return http.post(`/api/v1/auth/hard-delete`, {
         body,
         headers: {
           Authorization: `Bearer ${accessToken}`,

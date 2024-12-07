@@ -69,7 +69,22 @@ export default function SearchForm() {
     setLoading: setLoadingSchedule,
     setError: setErrorSchedule,
   } = useScheduleContext();
-
+  const [filteredFromStations, setFilteredFromStations] = useState<Station[]>(
+    []
+  );
+  const [filteredToStations, setFilteredToStations] = useState<Station[]>([]);
+  const filterStations = (input: string, type: "from" | "to") => {
+    const filtered = stations.filter(
+      (station) =>
+        station.name.toLowerCase().includes(input.toLowerCase()) &&
+        (type === "from" ? station.name !== to : station.name !== from)
+    );
+    if (type === "from") {
+      setFilteredFromStations(filtered);
+    } else {
+      setFilteredToStations(filtered);
+    }
+  };
   const handleSubmit = () => {
     const formData = {
       departureStation: from,
@@ -103,7 +118,6 @@ export default function SearchForm() {
         const response = await searchApiRequest.search.getScheduleByInfos(
           payload
         );
-        console.log(response.payload);
         const resultO = response.payload.result[0].map((train: any) => ({
           id: train.id,
           departureStationId: train.departureStationId,
@@ -165,7 +179,7 @@ export default function SearchForm() {
           &departureTime=${encodeURIComponent(formData.departureTime)}
           &arrivalTime=${encodeURIComponent(formData.arrivalTime)}`
         );
-      
+
         fetchStations(
           formData.departureStation,
           formData.arrivalStation,
@@ -248,7 +262,10 @@ export default function SearchForm() {
                     }}
                     id="from"
                     value={from}
-                    onChange={(e) => setFrom(e.target.value)}
+                    onChange={(e) => {
+                      setFrom(e.target.value);
+                      filterStations(e.target.value, "from");
+                    }}
                     className="block w-full ring-0 border-0 focus:focus-visible:ring-orange-600 shadow-none h-14 pt-5 font-semibold focus:bg-white"
                   />
                   {openMenus["from"] && (
@@ -335,7 +352,10 @@ export default function SearchForm() {
                     }}
                     id="to"
                     value={to}
-                    onChange={(e) => setTo(e.target.value)}
+                    onChange={(e) => {
+                      setTo(e.target.value);
+                      filterStations(e.target.value, "to");
+                    }}
                     className="lg:pl-7 block w-full ring-0 border-0 focus:focus-visible:ring-orange-600 shadow-none h-14 pt-5 font-semibold focus:bg-white"
                   />
                   {openMenus["to"] && (

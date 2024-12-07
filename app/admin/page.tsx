@@ -1,3 +1,4 @@
+"use client"
 // src/pages/admin/index.tsx
 import React, { useState } from "react";
 import TrainManagement from "./components/TrainManagement";

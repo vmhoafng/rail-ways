@@ -20,13 +20,13 @@ import Link from "next/link";
 import PaymentMethodSelector from "../../Payment/PaymentForm/PaymentMethodSelector";
 import PaymentForm from "../../Payment/PaymentForm/PaymentForm";
 import { useSearchParams } from "next/navigation";
-import { useSeatsContext } from "@/contexts/SeatContext";
+import { useSeatsContext } from "@/app/context/SeatsContext";
 
 export default function BookingForm() {
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-  const { getTrainInfo, updateSelectedSeats } = useSeatsContext();
+  const { getTrainInfo, updateSelectedSeats,trains } = useSeatsContext();
   const searchParams = useSearchParams();
-  console.log(getTrainInfo("13"));
+  console.log(trains);
 
   const [customerInfo, setCustomerInfo] = useState({});
   const [price, setPrice] = useState(0);

@@ -167,7 +167,7 @@ export interface Train {
 export interface GetScheduleResponse {
   message: string[];
   status: number;
-  result: any;
+  result: Train[] | any[];
 }
 
 export interface createTrainBodyType {

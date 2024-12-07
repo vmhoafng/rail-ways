@@ -10,6 +10,7 @@ import { Montserrat } from "next/font/google";
 import { StationsProvider } from "./context/StationsContext";
 import { JourneyProvider } from "./context/JourneyContext";
 import { ScheduleProvider } from "./context/ScheduleContext";
+import { SeatsProvider as SP } from "@/contexts/SeatContext";
 import { SeatsProvider } from "./context/SeatsContext";
 
 const montserrat = Montserrat({
@@ -22,25 +23,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ScheduleProvider>
-      <JourneyProvider>
-        <SeatsProvider>
-          <StationsProvider>
-            <html lang="en">
-              <body className={montserrat.className}>
-                <UserProvider>
-                  <div className="bg-slate-100 flex flex-col">
-                    <Header />
-                    <main className="flex-grow">{children}</main>
-                    <Toaster />
-                    <Footer />
-                  </div>
-                </UserProvider>
-              </body>
-            </html>
-          </StationsProvider>
-        </SeatsProvider>
-      </JourneyProvider>
-    </ScheduleProvider>
+    <SP>
+      <ScheduleProvider>
+        <JourneyProvider>
+          <SeatsProvider>
+            <StationsProvider>
+              <html lang="en">
+                <body className={montserrat.className}>
+                  <UserProvider>
+                    <div className="bg-slate-100 flex flex-col">
+                      <Header />
+                      <main className="flex-grow">{children}</main>
+                      <Toaster />
+                      <Footer />
+                    </div>
+                  </UserProvider>
+                </body>
+              </html>
+            </StationsProvider>
+          </SeatsProvider>
+        </JourneyProvider>
+      </ScheduleProvider>
+    </SP>
   );
 }

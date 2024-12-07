@@ -167,7 +167,6 @@ export default function StatisticsPage() {
       mode: "index" as const,
       intersect: false,
     },
-    stacked: false,
     plugins: {
       title: {
         display: true,

@@ -11,7 +11,7 @@ export default function SearchButton() {
   useEffect(() => {
     if (outboundTrainId || returnTrainId) {
       router.push(
-        `/booking?outbound=${outboundTrainId}&return=${returnTrainId}`
+        `/Booking?outbound=${outboundTrainId}&return=${returnTrainId}`
       );
     } else {
       alert("Vui lòng chọn cả chuyến đi và chuyến về trước khi tìm kiếm.");

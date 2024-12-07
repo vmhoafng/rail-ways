@@ -272,10 +272,10 @@ export interface getAllResponse {
 }
 
 export interface TrainBasicInfo {
-  trainName: string;
-  trainNumber: string;
-  trainType: string;
-  currentStationId: number;
+  trainName?: string;
+  trainNumber?: string;
+  trainType?: string;
+  trainStatus?: string;
 }
 
 export interface GetAllTrainBasicResponse {
@@ -332,3 +332,4 @@ export interface deleteUserResponse {
   status: number;
   result: {};
 }
+export interface getScheduleByIdResponse {}

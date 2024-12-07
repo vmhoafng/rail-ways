@@ -9,22 +9,28 @@ const TrainManagement = () => {
     const [loading, setLoading] = useState(false);
 
     const fetchTrains = async () => {
-        setLoading(true);
         const accessToken = localStorage.getItem("accessToken") || "";
         try {
             const response = await adminApiRequests.train.getAll(accessToken);
-            setTrains(response.payload.result);
+            console.log("API Response: ", response); // Xem toàn bộ phản hồi
+            if (response.payload && response.payload.result) {
+                setTrains(response.payload.result); // Chỉ gọi `setTrains` khi dữ liệu đúng
+            } else {
+                console.error("Invalid API Response: ", response.payload);
+            }
         } catch (error) {
-            console.error("Error fetching trains:", error);
-        } finally {
-            setLoading(false);
+            console.error("Error fetching trains: ", error);
         }
     };
 
-    useEffect(() => {
-        fetchTrains();
-        console.log("Trains: ", trains);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            await fetchTrains();
+            setLoading(false);
+        };
+        fetchData(); // Gọi hàm bên trong `useEffect`
     }, []);
 
     return (
@@ -35,7 +41,7 @@ const TrainManagement = () => {
                 trainName: train.trainName,
                 trainNumber: train.trainNumber,
                 trainType: train.trainType,
-                currentStationId: train.currentStationId,
+                trainStatus: train.trainStatus,
             }))}
             loading={loading}
         />

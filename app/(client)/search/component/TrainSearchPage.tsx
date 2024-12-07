@@ -114,7 +114,29 @@ const TrainSearchPage = () => {
                 <AlertTitle>Lỗi</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
-            ) : schedule.length > 0 && activeTab === "outbound" ? (
+            ) : schedule.length > 0 && trip === "one-way" ? schedule?.map((train: TrainJourney) => (
+              <TrainOption
+                key={train.id}
+                departureStationName={train.departureStationName}
+                arrivalStationName={train.arrivalStationName}
+                trainId={train.id}
+                departureTime={format(
+                  new Date(train.departureTime),
+                  "HH:mm",
+                  { locale: vi }
+                )}
+                arrivalTime={format(
+                  new Date(train.arrivalTime),
+                  "HH:mm",
+                  { locale: vi }
+                )}
+                duration={duration(train.departureTime, train.arrivalTime)}
+                trainType={train.trainName}
+                railcars={train.railcars}
+                journeyType={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            )) : activeTab === "outbound" ? (
               schedule[0]?.map((train: TrainJourney) => (
                 <TrainOption
                   key={train.id}

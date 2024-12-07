@@ -10,6 +10,7 @@ import { SeatsProvider } from "./context/SeatsContext";
 import { Montserrat } from "next/font/google";
 import { StationsProvider } from "./context/StationsContext";
 import { JourneyProvider } from "./context/JourneyContext";
+import ChatWidget from "./components/ChatWidget";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({
               <UserProvider>
                 <div className="bg-slate-100 flex flex-col">
                   <Header />
+                  <ChatWidget />
                   <main className="flex-grow">{children}</main>
                   <Toaster />
                   <Footer />

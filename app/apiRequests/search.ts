@@ -21,6 +21,15 @@ const searchApiRequest = {
       );
     },
   },
+  getScheduleById: (id: number, accessToken: string | null) =>
+    http.get<GetScheduleResponse>(
+      `/api/v1/schedule/anonymous/get-schedule/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    ),
 };
 
 export default searchApiRequest;

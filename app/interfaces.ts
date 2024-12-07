@@ -270,3 +270,65 @@ export interface getAllResponse {
   status: number;
   result: Station[];
 }
+
+export interface TrainBasicInfo {
+  trainName: string;
+  trainNumber: string;
+  trainType: string;
+  currentStationId: number;
+}
+
+export interface GetAllTrainBasicResponse {
+  message: string[];
+  status: number;
+  result: TrainBasicInfo[];
+}
+export interface GetAllRailCarResponse {
+  message: string[];
+  status: number;
+  result: {
+    name: string;
+    railcarType: string;
+    capacity: number;
+    seatPerRow: number;
+    isHaveFloor: boolean;
+  }[];
+}
+export interface getAllStationsResponse {
+  message: string[];
+  status: number;
+  result: Station[];
+}
+export interface getAllUsersResponse {
+  message: string[];
+  status: number;
+  result: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address?: string;
+    createdDate: string;
+    roleName: string[];
+  }[];
+}
+export interface getUserByIdResponse {
+  message: string[];
+  status: number;
+  result: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address?: string;
+    createdDate: string;
+    roleName: string[];
+  };
+}
+export interface deleteUserResponse {
+  message: string[];
+  status: number;
+  result: {};
+}

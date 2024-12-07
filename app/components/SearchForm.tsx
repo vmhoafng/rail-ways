@@ -19,9 +19,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useStations } from "../context/StationsContext";
 import { apiService } from "../../lib/apiService";
 import searchApiRequest from "../apiRequests/search";
-import { Station } from "../interfaces";
+import { Railcar, Station } from "../interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useScheduleContext } from "../context/ScheduleContext";
 
 export default function SearchForm() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -63,36 +64,106 @@ export default function SearchForm() {
       | "round-trip") || "one-way"
   );
 
+  const {
+    setSchedule,
+    setLoading: setLoadingSchedule,
+    setError: setErrorSchedule,
+  } = useScheduleContext();
+
   const handleSubmit = () => {
-    if (trip === "one-way") {
-      const formData = {
-        departureStation: from,
-        arrivalStation: to,
-        departureTime: date && date.getTime(),
-      };
-      router.push(
-        `/search?departureStation=${encodeURIComponent(
-          formData.departureStation
-        )}&arrivalStation=${encodeURIComponent(
-          formData.arrivalStation
-        )}&trip=${encodeURIComponent("one-way")}
-        &departureTime=${encodeURIComponent(formData.departureTime)}`
-      );
+    const formData = {
+      departureStation: from,
+      arrivalStation: to,
+      departureTime: date && date.getTime(),
+      arrivalTime: returnDate && returnDate.getTime(),
+    };
+    const fetchStations = async (
+      departureStation: any,
+      arrivalStation: any,
+      departureTime: any,
+      arrivalTime?: any
+    ) => {
       try {
-        // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
+        setLoadingSchedule(true);
+        setErrorSchedule(null);
+        const payload: any = {
+          departureStation,
+          arrivalStation,
+          departureTime: new Date(departureTime + 7 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 19) // Get the part before milliseconds (.000)
+            .concat("+07:00"),
+        };
+        if (arrivalTime) {
+          payload.arrivalTime = new Date(returnDate + 7 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 19) // Get the part before milliseconds (.000)
+            .concat("+07:00");
+        }
+        const response = await searchApiRequest.search.getScheduleByInfos(
+          payload
+        );
+        console.log(response.payload);
+        const resultO = response.payload.result[0].map((train: any) => ({
+          id: train.id,
+          departureStationId: train.departureStationId,
+          arrivalStationId: train.arrivalStationId,
+          departureStationName: train.departureStationName,
+          arrivalStationName: train.arrivalStationName,
+          departureTime: train.departureTime,
+          arrivalTime: train.arrivalTime,
+          trainName: train.trainName,
+          railcars: train.railcars,
+        }));
+        const resultR = response.payload.result[1].map((train: any) => ({
+          id: train.id,
+          departureStationId: train.departureStationId,
+          departureStationName: train.departureStationName,
+          arrivalStationId: train.arrivalStationId,
+          arrivalStationName: train.arrivalStationName,
+          departureTime: train.departureTime,
+          arrivalTime: train.arrivalTime,
+          trainName: train.trainName,
+          railcars: train.railcars,
+        }));
+        setSchedule([resultO, resultR]);
+      } catch (error) {
+        setErrorSchedule(
+          "Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau."
+        );
+      } finally {
+        setLoadingSchedule(false);
+      }
+    };
+    if (trip === "one-way") {
+      try {
+        fetchStations(
+          formData.departureStation,
+          formData.arrivalStation,
+          formData.departureTime
+        );
+        router.push(
+          `/search?departureStation=${encodeURIComponent(
+            formData.departureStation
+          )}&arrivalStation=${encodeURIComponent(
+            formData.arrivalStation
+          )}&trip=${encodeURIComponent("one-way")}
+        &departureTime=${encodeURIComponent(formData.departureTime)}`
+        );
       } catch (error) {
         console.error("Failed to fetch schedule:", error);
       }
     }
     if (trip === "round-trip") {
-      const formData = {
-        departureStation: from,
-        arrivalStation: to,
-        departureTime: date && date.getTime(),
-        arrivalTime: returnDate && returnDate.getTime(),
-      };
+      console.log("rt");
+
       try {
-        // Nếu gọi API thành công, chuyển hướng đến trang "/search" với query params
+        fetchStations(
+          formData.departureStation,
+          formData.arrivalStation,
+          formData.departureTime,
+          formData.arrivalTime
+        );
         router.push(
           `/search?departureStation=${encodeURIComponent(
             formData.departureStation

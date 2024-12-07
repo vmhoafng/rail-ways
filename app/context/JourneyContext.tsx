@@ -15,8 +15,6 @@ const JourneyContext = createContext<JourneyContextType | undefined>(undefined);
 export function JourneyProvider({ children }: { children: React.ReactNode }) {
   const [outboundTrainId, setOutboundTrainId] = useState<string | null>(null);
   const [returnTrainId, setReturnTrainId] = useState<string | null>(null);
-  console.log(outboundTrainId);
-
   const handleChooseChange = (id: string) => {
     setOutboundTrainId(() => id);
   };

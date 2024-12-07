@@ -91,7 +91,11 @@ export default function TrainOptionCard({
   }, [updateTrainInfo]);
 
   const handleTabClick = () => {
-    setActiveState({ trainId, activeTab: "seat" });
+    if (isActive && activeState.activeTab === "seats") {
+      setActiveState({ trainId: null, activeTab: null });
+    } else {
+      setActiveState({ trainId, activeTab: "seats" });
+    }
   };
 
   const searchParams = useSearchParams();
@@ -108,9 +112,7 @@ export default function TrainOptionCard({
         setActiveTab("return");
       } else {
         setReturnTrainId(trainId);
-        router.push(
-          `/booking?outbound=${outboundTrainId}&return=${trainId}`
-        );
+        router.push(`/booking?outbound=${outboundTrainId}&return=${trainId}`);
       }
     }
   };
@@ -124,9 +126,9 @@ export default function TrainOptionCard({
   }, [outboundTrainId, returnTrainId]);
   return (
     <div
-      className={`bg-white rounded-lg shadow-md overflow-hidden border ${isSelected ? "border-orange-500" : "border-orange-200"
-        }`}
-    >
+      className={`bg-white rounded-lg shadow-md overflow-hidden border ${
+        isSelected ? "border-orange-500" : "border-orange-200"
+      }`}>
       <div className="p-4">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center space-x-2">
@@ -146,32 +148,36 @@ export default function TrainOptionCard({
           <ChevronRight className="w-4 h-4 text-gray-400" />
           <span>{arrivalStationName}</span>
         </div>
+        <div></div>
+      </div>
+      <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end items-center">
         <Tabs value={isActive ? "seat" : ""} className="w-full">
-          <TabsList className="flex justify-center items-center bg-gray-100 p-1 h-fit rounded-md">
+          <TabsList className="flex justify-between items-center bg-gray-100 p-1 w-full h-fit rounded-md">
             <TabsTrigger
               value="seat"
               onClick={handleTabClick}
-              className={`text-sm py-1.5 w-full ${isActive ? "bg-white shadow rounded-md" : "text-gray-600 hover:text-gray-800"}`}
-            >
+              className={`text-sm px-6 py-2 r ${
+                isActive
+                  ? "bg-white shadow rounded-md"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}>
               Chọn ghế
             </TabsTrigger>
+            <Button
+              type="button"
+              onClick={handleSelectTrain}
+              className={`font-medium px-6 py-2 rounded-md ${
+                isSelected
+                  ? "bg-green-500 hover:bg-green-600 text-white"
+                  : "bg-orange-500 hover:bg-orange-600 text-white"
+              }`}>
+              {isSelected ? "Đã chọn" : "Chọn chuyến"}
+            </Button>
           </TabsList>
           <TabsContent value="seat">
             {isActive && <Seats trainId={trainId} />}
           </TabsContent>
         </Tabs>
-      </div>
-      <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center">
-        <Button
-          type="button"
-          onClick={handleSelectTrain}
-          className={`font-medium px-6 py-2 rounded-md ${isSelected
-            ? "bg-green-500 hover:bg-green-600 text-white"
-            : "bg-orange-500 hover:bg-orange-600 text-white"
-            }`}
-        >
-          {isSelected ? "Đã chọn" : "Chọn chuyến"}
-        </Button>
       </div>
     </div>
   );

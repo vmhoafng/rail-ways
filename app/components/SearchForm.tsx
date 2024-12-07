@@ -95,7 +95,7 @@ export default function SearchForm() {
             .concat("+07:00"),
         };
         if (arrivalTime) {
-          payload.arrivalTime = new Date(returnDate + 7 * 60 * 60 * 1000)
+          payload.arrivalTime = new Date(arrivalTime + 7 * 60 * 60 * 1000)
             .toISOString()
             .slice(0, 19) // Get the part before milliseconds (.000)
             .concat("+07:00");
@@ -155,15 +155,7 @@ export default function SearchForm() {
       }
     }
     if (trip === "round-trip") {
-      console.log("rt");
-
       try {
-        fetchStations(
-          formData.departureStation,
-          formData.arrivalStation,
-          formData.departureTime,
-          formData.arrivalTime
-        );
         router.push(
           `/search?departureStation=${encodeURIComponent(
             formData.departureStation
@@ -172,6 +164,13 @@ export default function SearchForm() {
           )}&trip=${encodeURIComponent("round-trip")}
           &departureTime=${encodeURIComponent(formData.departureTime)}
           &arrivalTime=${encodeURIComponent(formData.arrivalTime)}`
+        );
+      
+        fetchStations(
+          formData.departureStation,
+          formData.arrivalStation,
+          formData.departureTime,
+          formData.arrivalTime
         );
       } catch (error) {
         console.error("Failed to fetch schedule:", error);
@@ -497,7 +496,9 @@ export default function SearchForm() {
                       disabled={(day) => ValiDate(day)}
                       mode="single"
                       selected={returnDate}
-                      onSelect={setReturnDate}
+                      onSelect={(selectedDate) => {
+                        setReturnDate(selectedDate); // Set the return date if needed
+                      }}
                       initialFocus
                       className="w-full"
                     />

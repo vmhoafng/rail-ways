@@ -112,7 +112,7 @@ export default function TrainOptionCard({
         setActiveTab("return");
       } else {
         setReturnTrainId(trainId);
-        router.push(`/booking?outbound=${outboundTrainId}&return=${trainId}`);
+        router.push(`/Booking?outbound=${outboundTrainId}&return=${trainId}`);
       }
     }
   };
@@ -120,7 +120,7 @@ export default function TrainOptionCard({
   useEffect(() => {
     if (outboundTrainId && returnTrainId) {
       router.push(
-        `/booking?outbound=${outboundTrainId}&return=${returnTrainId}`
+        `/Booking?outbound=${outboundTrainId}&return=${returnTrainId}`
       );
     }
   }, [outboundTrainId, returnTrainId]);

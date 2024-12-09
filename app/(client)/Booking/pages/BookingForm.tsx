@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -15,13 +14,11 @@ import CustomerInfo from "../components/CustomerInfo";
 import TripInfo from "../components/TripInfo";
 import PriceSummary from "../components/PriceSummary";
 import TripInfoCard from "../components/TripInfoCard";
-import PriceDetailsCard from "../components/PriceDetailsCard";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
-import PaymentMethodSelector from "../../Payment/PaymentForm/PaymentMethodSelector";
-import PaymentForm from "../../Payment/PaymentForm/PaymentForm";
 import { useSearchParams } from "next/navigation";
 import { useSeatsContext } from "@/app/context/SeatsContext";
+import { PaymentMethodSelector } from "../components/PaymentMethodSelector";
+
 
 export default function BookingForm() {
     const { getTrainInfo, updateSelectedSeats, trains } = useSeatsContext();
@@ -35,6 +32,8 @@ export default function BookingForm() {
     const [price, setPrice] = useState(0);
     const [step, setStep] = useState(1);
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+    const [paymentMethod, setPaymentMethod] = useState('momo');
+
     const fetchSchedule = async (id: any) => {
         try {
             const response = await fetch(
@@ -43,8 +42,7 @@ export default function BookingForm() {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("accessToken") || ""
-                            }`,
+                        Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
                     },
                 }
             );
@@ -52,17 +50,15 @@ export default function BookingForm() {
                 throw new Error(`Error: ${response.statusText}`);
             }
             const data = await response.json();
-            setSchedule(data); // Adjust this based on your API's response structure
+            setSchedule(data);
         } catch (err) {
             console.error(err);
-        } finally {
         }
     };
 
     useEffect(() => {
         fetchSchedule(13);
     }, []);
-    console.log(trains, schedule);
 
     const handleSeatSelect = (seatNumber: number) => {
         setSelectedSeat(seatNumber);
@@ -74,7 +70,7 @@ export default function BookingForm() {
     };
 
     const handleSubmit = () => {
-        console.log("Booking submitted", { selectedSeat, customerInfo, price });
+        console.log("Booking submitted", { selectedSeat, customerInfo, price, paymentMethod });
     };
 
     const steps = [
@@ -88,10 +84,10 @@ export default function BookingForm() {
         <>
             {/* Desktop View */}
             <div className="hidden md:grid md:container-custom grid-cols-3 gap-x-4 items-start justify-stretch">
-                <div className="">
+                <div className="space-y-4 col-span-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Đặt vé xe</CardTitle>
+                            <CardTitle>Đặt vé tàu</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <SeatMap onSeatSelect={handleSeatSelect} />
@@ -102,25 +98,35 @@ export default function BookingForm() {
                     </Card>
                 </div>
 
-                <div className="flex flex-col gap-4 ">
-                    <TripInfoCard
-                        route="Sai Gon - Ha Noi"
-                        departureTime="00:02 01/11/2024"
-                        seatCount={selectedSeat ? 1 : 0}
-                        dropOffPoint="Đà Lạt"
-                        totalCost={price}
-                    />
-                    <PriceDetailsCard ticketPrice={price} paymentFee={0} />
-                </div>
-                <div className="flex flex-cols ">
-                    <PaymentForm />
+                <div className="space-y-3">
+                    <div className="space-y-4">
+                        <TripInfoCard
+                            route="Sai Gon - Ha Noi"
+                            departureTime="00:02 01/11/2024"
+                            seatCount={selectedSeat ? 1 : 0}
+                            dropOffPoint="Đà Lạt"
+                            totalCost={price}
+                        />
+                    </div>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Phương thức thanh toán</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <PaymentMethodSelector onSelect={setPaymentMethod} />
+                        </CardContent>
+                        <CardFooter>
+                            <Button className="w-full" onClick={handleSubmit}>Xác nhận đặt vé</Button>
+                        </CardFooter>
+                    </Card>
                 </div>
             </div>
 
             {/* Mobile View */}
             <div className="md:hidden min-h-screen bg-gray-50">
                 {/* Fixed Header */}
-                <div className=" bg-white z-10">
+                <div className="fixed top-0 left-0 right-0 bg-white z-10">
                     <div className="flex items-center justify-between px-4 py-2 text-xs border-b">
                         {steps.map((s, i) => (
                             <div
@@ -128,14 +134,16 @@ export default function BookingForm() {
                                 className={cn(
                                     "flex items-center",
                                     step === s.id ? "text-primary" : "text-gray-400"
-                                )}>
+                                )}
+                            >
                                 <div
                                     className={cn(
                                         "w-6 h-6 rounded-full flex items-center justify-center border",
                                         step === s.id
                                             ? "border-primary text-primary"
                                             : "border-gray-300"
-                                    )}>
+                                    )}
+                                >
                                     {s.id}
                                 </div>
                                 <span className="ml-1 hidden sm:inline">{s.title}</span>
@@ -148,10 +156,34 @@ export default function BookingForm() {
                 </div>
 
                 {/* Mobile Content */}
-                <div className="pt-28 px-4 pb-24">
-                    <div className="space-y-6">
-                        <SeatMap onSeatSelect={handleSeatSelect} />
-                    </div>
+                <div className="pt-16 px-4 pb-24">
+                    {step === 1 && (
+                        <div className="space-y-6">
+                            <SeatMap onSeatSelect={handleSeatSelect} />
+                        </div>
+                    )}
+                    {step === 2 && (
+                        <div className="space-y-6">
+                            <CustomerInfo onInfoChange={handleInfoChange} />
+                        </div>
+                    )}
+                    {step === 3 && (
+                        <div className="space-y-6">
+                            <TripInfo departure="Sài Gòn" arrival="Hà Nội" />
+                        </div>
+                    )}
+                    {step === 4 && (
+                        <div className="space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Phương thức thanh toán</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <PaymentMethodSelector onSelect={setPaymentMethod} />
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
                 </div>
 
                 {/* Mobile Bottom Bar */}
@@ -167,11 +199,19 @@ export default function BookingForm() {
                     <Button
                         className="w-full bg-orange-600 hover:bg-orange-500"
                         size="lg"
-                        onClick={() => setStep((prev) => Math.min(prev + 1, 4))}>
-                        Mua vé
+                        onClick={() => {
+                            if (step < 4) {
+                                setStep((prev) => prev + 1);
+                            } else {
+                                handleSubmit();
+                            }
+                        }}
+                    >
+                        {step < 4 ? "Tiếp tục" : "Xác nhận đặt vé"}
                     </Button>
                 </div>
             </div>
         </>
     );
 }
+

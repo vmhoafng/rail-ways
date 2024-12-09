@@ -24,7 +24,7 @@ const TripInfoCard: React.FC<TripInfoCardProps> = ({
             <CardContent>
                 <div className="space-y-2">
                     <div className="flex justify-between">
-                        <span>Tuyến xe</span>
+                        <span>Tuyến tàu</span>
                         <span>{route}</span>
                     </div>
                     <div className="flex justify-between">

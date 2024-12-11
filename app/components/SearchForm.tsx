@@ -111,26 +111,10 @@ export default function SearchForm() {
             payload
           );
           const resultO = response.payload.result[0].map((train: any) => ({
-            id: train.id,
-            departureStationId: train.departureStationId,
-            arrivalStationId: train.arrivalStationId,
-            departureStationName: train.departureStationName,
-            arrivalStationName: train.arrivalStationName,
-            departureTime: train.departureTime,
-            arrivalTime: train.arrivalTime,
-            trainName: train.trainName,
-            railcars: train.railcars,
+            ...train,
           }));
           const resultR = response.payload.result[1].map((train: any) => ({
-            id: train.id,
-            departureStationId: train.departureStationId,
-            departureStationName: train.departureStationName,
-            arrivalStationId: train.arrivalStationId,
-            arrivalStationName: train.arrivalStationName,
-            departureTime: train.departureTime,
-            arrivalTime: train.arrivalTime,
-            trainName: train.trainName,
-            railcars: train.railcars,
+            ...train,
           }));
           setSchedule([resultO, resultR]);
         }
@@ -140,19 +124,10 @@ export default function SearchForm() {
           );
 
           const result = response.payload.result.map((train: any) => ({
-            id: train.id,
-            departureStationId: train.departureStationId,
-            departureStationName: train.departureStationName,
-            arrivalStationId: train.arrivalStationId,
-            arrivalStationName: train.arrivalStationName,
-            departureTime: train.departureTime,
-            arrivalTime: train.arrivalTime,
-            trainName: train.trainName,
-            railcars: train.railcars,
+            ...train,
           }));
           setSchedule(result);
         }
-
       } catch (error) {
         setErrorSchedule(
           "Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau."
@@ -229,11 +204,13 @@ export default function SearchForm() {
             <RadioGroupItem value="one-way" id="one-way" className="hidden" />
             <Label htmlFor="one-way" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${trip === "one-way" ? "border-orange-600" : "border-gray-200"
-                  }`}>
+                className={` border-2 rounded-full -mt-0.5 ${
+                  trip === "one-way" ? "border-orange-600" : "border-gray-200"
+                }`}>
                 <span
-                  className={`flex items-center border cursor-pointer size-3 rounded-full ${trip === "one-way" ? "bg-orange-600" : "bg-white"
-                    }`}></span>
+                  className={`flex items-center border cursor-pointer size-3 rounded-full ${
+                    trip === "one-way" ? "bg-orange-600" : "bg-white"
+                  }`}></span>
               </span>
               Một chiều
             </Label>
@@ -246,13 +223,15 @@ export default function SearchForm() {
             />
             <Label htmlFor="round-trip" className="flex gap-2 items-center">
               <span
-                className={` border-2 rounded-full -mt-0.5 ${trip === "round-trip"
-                  ? "border-orange-600"
-                  : "border-gray-200"
-                  }`}>
+                className={` border-2 rounded-full -mt-0.5 ${
+                  trip === "round-trip"
+                    ? "border-orange-600"
+                    : "border-gray-200"
+                }`}>
                 <span
-                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${trip === "round-trip" ? "bg-orange-600" : "bg-white"
-                    }`}></span>
+                  className={`flex items-center border  cursor-pointer size-3 rounded-full ${
+                    trip === "round-trip" ? "bg-orange-600" : "bg-white"
+                  }`}></span>
               </span>
               Khứ hồi
             </Label>

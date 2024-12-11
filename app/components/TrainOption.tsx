@@ -175,7 +175,7 @@ export default function TrainOptionCard({
             </Button>
           </TabsList>
           <TabsContent value="seat">
-            {isActive && <Seats trainId={trainId} />}
+            {isActive && <Seats trainId={trainId}/>}
           </TabsContent>
         </Tabs>
       </div>

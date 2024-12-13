@@ -30,12 +30,12 @@ const ticketApiRequest = {
       }
     },
 
-    async getTicketByOrderNumber(orderNumber: string): Promise<Ticket> {
+    async getTicketByOrderNumber(orderNumber: string): Promise<Ticket[]> {
       try {
-        const response = await http.get<{ result: Ticket }>(
+        const response = await http.get<{ result: Ticket[] }>(
           `/api/v1/ticket/anonymous/get-by-order-number?orderNumber=${orderNumber}`
         );
-        return response.payload.result; // Trả về thông tin vé từ API
+        return response.payload.result; // Trả về danh sách vé từ API
       } catch (error) {
         console.error("Error in getTicketByOrderNumber:", error);
         throw error;

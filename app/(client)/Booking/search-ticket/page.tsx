@@ -20,19 +20,23 @@ interface Ticket {
 
 export default function BookedTicketPage() {
     const [ticketCode, setTicketCode] = useState('');
-    const [ticket, setTicket] = useState<Ticket | null>(null);
+    const [tickets, setTickets] = useState<Ticket[] | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const searchTicket = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        setTicket(null);
+        setTickets(null);
         setLoading(true);
 
         try {
             const response = await ticketApiRequest.ticket.getTicketByOrderNumber(ticketCode);
-            setTicket(response);
+            if (response.length > 0) {
+                setTickets(response);
+            } else {
+                setError('Không tìm thấy vé với mã đã nhập.');
+            }
         } catch (err) {
             console.error('Error fetching ticket:', err);
             setError('Đã xảy ra lỗi, vui lòng thử lại sau.');
@@ -60,21 +64,25 @@ export default function BookedTicketPage() {
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
-            {ticket && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Thông tin vé</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p><strong>Ga đi:</strong> {ticket.departureStationName}</p>
-                        <p><strong>Ga đến:</strong> {ticket.arrivalStationName}</p>
-                        <p><strong>Thời gian khởi hành:</strong> {new Date(ticket.departureTime).toLocaleString('vi-VN')}</p>
-                        <p><strong>Số ghế:</strong> {ticket.seatNumber.join(', ')}</p>
-                        <p><strong>Giá vé:</strong> {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(ticket.price)}</p>
-                        <p><strong>Tên hành khách:</strong> {ticket.customerName}</p>
-                        <p><strong>Email:</strong> {ticket.customerEmail}</p>
-                    </CardContent>
-                </Card>
+            {tickets && tickets.length > 0 && (
+                <div>
+                    {tickets.map((ticket, index) => (
+                        <Card key={index} className="mb-4">
+                            <CardHeader>
+                                <CardTitle>Thông tin vé</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p><strong>Ga đi:</strong> {ticket.departureStationName}</p>
+                                <p><strong>Ga đến:</strong> {ticket.arrivalStationName}</p>
+                                <p><strong>Thời gian khởi hành:</strong> {new Date(ticket.departureTime).toLocaleString('vi-VN')}</p>
+                                <p><strong>Số ghế:</strong> {ticket.seatNumber.join(', ')}</p>
+                                <p><strong>Giá vé:</strong> {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(ticket.price)}</p>
+                                <p><strong>Tên hành khách:</strong> {ticket.customerName}</p>
+                                <p><strong>Email:</strong> {ticket.customerEmail}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             )}
 
             {loading && <p className="text-blue-500">Đang tìm kiếm...</p>}

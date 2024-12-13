@@ -24,6 +24,7 @@ import { vi } from "date-fns/locale";
 
 export default function BookingForm() {
   const { getTrainInfo, updateSelectedSeats, trains } = useSeatsContext();
+
   const { schedule } = useScheduleContext();
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
   const searchParams = useSearchParams();
@@ -36,7 +37,6 @@ export default function BookingForm() {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("momo");
   const isHavingRoundTrip = searchParams.get("isHaveRoundTrip");
-  console.log(trains);
 
   const fetchSchedule = async (id: any) => {
     try {
@@ -73,38 +73,43 @@ export default function BookingForm() {
   };
 
   const handleSubmit = () => {
-    console.log(customerInfo);
-
-    console.log("Booking submitted", {
-      orderNumber: "3121111120",
+    const data = {
+      orderNumber: new Date().getTime(),
       customerName: customerInfo.name,
       customerEmail: customerInfo.email,
       totalPrice:
-        trains[0].selectedSeats
-          .map((seat) => seat.price)
-          .reduce((sum, num) => sum + num, 0) +
-        trains[1].selectedSeats
-          .map((seat) => seat.price)
-          .reduce((sum, num) => sum + num, 0),
+        isHavingRoundTrip === "false"
+          ? trains[0].selectedSeats
+              .map((seat) => seat.price)
+              .reduce((sum, num) => sum + num, 0)
+          : trains[0].selectedSeats
+              .map((seat) => seat.price)
+              .reduce((sum, num) => sum + num, 0) +
+            trains[1]?.selectedSeats
+              .map((seat) => seat.price)
+              .reduce((sum, num) => sum + num, 0),
       scheduleId: trains[0],
-      departureStationId: 24,
-      arrivalStationId: 23,
+      departureStationId: trains[0]?.trainId,
+      arrivalStationId: trains[1] && trains[1]?.trainId,
       orderItems: [
-        {
-          seatId: 298,
-          price: 500000.0,
-        },
+        ...trains[0].selectedSeats.map((seat) => ({
+          seatId: seat.seatNumber,
+          price: seat.price,
+        })),
       ],
-      isHaveRoundTrip: true,
+      isHaveRoundTrip: isHavingRoundTrip,
       roundTripScheduleId: trains[1],
-      roundTripItems: [
-        {
-          seatId: 202,
-          price: 500000.0,
-        },
-      ],
-      paymentMethod: "MOMO",
-    });
+      roundTripItems:
+        isHavingRoundTrip === "true"
+          ? [
+              ...trains[1]?.selectedSeats.map((seat) => ({
+                seatId: seat.seatNumber,
+                price: seat.price,
+              })),
+            ]
+          : undefined,
+      paymentMethod: paymentMethod,
+    };
   };
 
   const steps = [
@@ -138,7 +143,7 @@ export default function BookingForm() {
                   />{" "}
                   <h3 className="font-bold text-lg">Chuyến về</h3>
                   <SeatMap
-                    trainId={trains[1]?.trainId}
+                    trainId={trains[1] && trains[1]?.trainId}
                     onSeatSelect={handleSeatSelect}
                   />
                 </>
@@ -194,11 +199,14 @@ export default function BookingForm() {
                       locale: vi,
                     }
                   ).toUpperCase()!}`}
-                  seatCount={trains[1]?.selectedSeats.length}
+                  seatCount={trains[1] && trains[1]?.selectedSeats.length}
                   dropOffPoint={schedule[1][0]?.arrivalStationName}
-                  totalCost={trains[1].selectedSeats
-                    .map((seat) => seat.price)
-                    .reduce((sum, num) => sum + num, 0)}
+                  totalCost={
+                    trains[1] &&
+                    trains[1].selectedSeats
+                      .map((seat) => seat.price)
+                      .reduce((sum, num) => sum + num, 0)
+                  }
                 />
               </>
             )}
@@ -212,12 +220,16 @@ export default function BookingForm() {
               <CustomerInfo onInfoChange={handleInfoChange} />
               <PriceSummary
                 price={
-                  trains[0].selectedSeats
-                    .map((seat) => seat.price)
-                    .reduce((sum, num) => sum + num, 0) +
-                  trains[1].selectedSeats
-                    .map((seat) => seat.price)
-                    .reduce((sum, num) => sum + num, 0)
+                  isHavingRoundTrip === "false"
+                    ? trains[0].selectedSeats
+                        .map((seat) => seat.price)
+                        .reduce((sum, num) => sum + num, 0)
+                    : trains[0].selectedSeats
+                        .map((seat) => seat.price)
+                        .reduce((sum, num) => sum + num, 0) +
+                      trains[1]?.selectedSeats
+                        .map((seat) => seat.price)
+                        .reduce((sum, num) => sum + num, 0)
                 }
               />
               <PaymentMethodSelector onSelect={setPaymentMethod} />

@@ -7,6 +7,8 @@ interface TrainInfo {
   trainId: string;
   departureStationName: string;
   arrivalStationName: string;
+  departureStationId: string;
+  arrivalStationId: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;

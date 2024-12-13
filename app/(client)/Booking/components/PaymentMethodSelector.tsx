@@ -3,14 +3,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { CreditCard, Wallet, DollarSign } from 'lucide-react'
 
-type PaymentMethod = 'momo' | 'paypal' | 'direct'
+type PaymentMethod = 'MOMO' | 'PAYPAL' | 'COD'
 
 interface PaymentMethodSelectorProps {
     onSelect: (method: PaymentMethod) => void
 }
 
 export function PaymentMethodSelector({ onSelect }: PaymentMethodSelectorProps) {
-    const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('momo')
+    const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('MOMO')
 
     const handleSelect = (value: PaymentMethod) => {
         setSelectedMethod(value)
@@ -18,35 +18,35 @@ export function PaymentMethodSelector({ onSelect }: PaymentMethodSelectorProps) 
     }
 
     return (
-        <RadioGroup defaultValue="momo" className="grid grid-cols-3 gap-4">
+        <RadioGroup defaultValue="MOMO" className="grid grid-cols-3 gap-4">
             <div>
-                <RadioGroupItem value="momo" id="momo" className="peer sr-only" onClick={() => handleSelect('momo')} />
+                <RadioGroupItem value="MOMO" id="MOMO" className="peer sr-only" onClick={() => handleSelect('MOMO')} />
                 <Label
-                    htmlFor="momo"
+                    htmlFor="MOMO"
                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
                     <Wallet className="mb-3 h-6 w-6" />
-                    MoMo
+                    MOMO
                 </Label>
             </div>
             <div>
-                <RadioGroupItem value="paypal" id="paypal" className="peer sr-only" onClick={() => handleSelect('paypal')} />
+                <RadioGroupItem value="PAYPAL" id="PAYPAL" className="peer sr-only" onClick={() => handleSelect('PAYPAL')} />
                 <Label
-                    htmlFor="paypal"
+                    htmlFor="PAYPAL"
                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
                     <CreditCard className="mb-3 h-6 w-6" />
-                    PayPal
+                    PAYPAL
                 </Label>
             </div>
             <div>
-                <RadioGroupItem value="direct" id="direct" className="peer sr-only" onClick={() => handleSelect('direct')} />
+                <RadioGroupItem value="COD" id="COD" className="peer sr-only" onClick={() => handleSelect('COD')} />
                 <Label
-                    htmlFor="direct"
+                    htmlFor="COD"
                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                 >
                     <DollarSign className="mb-3 h-6 w-6" />
-                    Direct
+                    COD
                 </Label>
             </div>
         </RadioGroup>

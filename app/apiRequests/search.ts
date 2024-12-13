@@ -16,7 +16,7 @@ const searchApiRequest = {
       arrivalTime?: any;
     }) => {
       const queryParams = new URLSearchParams(params).toString();
-      return http.get<GetScheduleResponse>(
+      return http.get<any>(
         `/api/v1/schedule/anonymous/get-by-departure-and-arrival-name?${queryParams}`
       );
     },

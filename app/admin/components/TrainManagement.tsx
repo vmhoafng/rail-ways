@@ -43,7 +43,7 @@ const TrainManagement = () => {
   return (
     <TabContent
       title="Quản lý Tàu"
-      fields={["Mã tàu", "Tên tàu", "Loại tàu", "Ga hiện tại"]}
+      fields={["trainNumber", "trainName", "trainType", "trainStatus",]}
       data={trains.map((train) => ({
         trainName: train.trainName,
         trainNumber: train.trainNumber,

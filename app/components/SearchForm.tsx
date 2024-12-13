@@ -107,33 +107,27 @@ export default function SearchForm() {
             .toISOString()
             .slice(0, 19) // Get the part before milliseconds (.000)
             .concat("+07:00");
+          const response = await searchApiRequest.search.getScheduleByInfos(
+            payload
+          );
+          const resultO = response.payload.result[0].map((train: any) => ({
+            ...train,
+          }));
+          const resultR = response.payload.result[1].map((train: any) => ({
+            ...train,
+          }));
+          setSchedule([resultO, resultR]);
         }
-        const response = await searchApiRequest.search.getScheduleByInfos(
-          payload
-        );
-        const resultO = response.payload.result[0].map((train: any) => ({
-          id: train.id,
-          departureStationId: train.departureStationId,
-          arrivalStationId: train.arrivalStationId,
-          departureStationName: train.departureStationName,
-          arrivalStationName: train.arrivalStationName,
-          departureTime: train.departureTime,
-          arrivalTime: train.arrivalTime,
-          trainName: train.trainName,
-          railcars: train.railcars,
-        }));
-        const resultR = response.payload.result[1].map((train: any) => ({
-          id: train.id,
-          departureStationId: train.departureStationId,
-          departureStationName: train.departureStationName,
-          arrivalStationId: train.arrivalStationId,
-          arrivalStationName: train.arrivalStationName,
-          departureTime: train.departureTime,
-          arrivalTime: train.arrivalTime,
-          trainName: train.trainName,
-          railcars: train.railcars,
-        }));
-        setSchedule([resultO, resultR]);
+        if (!arrivalTime) {
+          const response = await searchApiRequest.search.getScheduleByInfos(
+            payload
+          );
+
+          const result = response.payload.result.map((train: any) => ({
+            ...train,
+          }));
+          setSchedule(result);
+        }
       } catch (error) {
         setErrorSchedule(
           "Không thể tải dữ liệu chuyến tàu. Vui lòng thử lại sau."
@@ -144,11 +138,6 @@ export default function SearchForm() {
     };
     if (trip === "one-way") {
       try {
-        fetchStations(
-          formData.departureStation,
-          formData.arrivalStation,
-          formData.departureTime
-        );
         router.push(
           `/search?departureStation=${encodeURIComponent(
             formData.departureStation
@@ -156,6 +145,11 @@ export default function SearchForm() {
             formData.arrivalStation
           )}&trip=${encodeURIComponent("one-way")}
         &departureTime=${encodeURIComponent(formData.departureTime)}`
+        );
+        fetchStations(
+          formData.departureStation,
+          formData.arrivalStation,
+          formData.departureTime
         );
       } catch (error) {
         console.error("Failed to fetch schedule:", error);

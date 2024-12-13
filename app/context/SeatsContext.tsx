@@ -7,12 +7,14 @@ interface TrainInfo {
   trainId: string;
   departureStationName: string;
   arrivalStationName: string;
+  departureStationId: string;
+  arrivalStationId: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;
   trainType: string;
   railcars: Railcar[]; // Thông tin các toa tàu
-  selectedSeats: string[]; // Danh sách ghế đã chọn
+  selectedSeats: any[]; // Danh sách ghế đã chọn
 }
 
 // Định nghĩa kiểu dữ liệu Railcar (toa tàu)

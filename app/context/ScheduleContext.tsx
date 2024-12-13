@@ -13,7 +13,7 @@ interface TrainSchedule {
 }
 
 interface ScheduleContextType {
-  schedule: any[];
+  schedule: any;
   setSchedule: React.Dispatch<React.SetStateAction<any[]>>;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;

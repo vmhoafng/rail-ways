@@ -6,6 +6,7 @@ import CarriageManagement from "./components/CarriageManagement";
 import StationManagement from "./components/StationManagement";
 import TicketManagement from "./components/TicketManagement";
 import UserManagement from "./components/UserManagement";
+import Link from "next/link";
 
 
 const AdminDashboard = () => {
@@ -60,6 +61,13 @@ const AdminDashboard = () => {
           onClick={() => setActiveTab("users")}
         >
           Quản lý Người Dùng
+        </button>
+        <button
+          className={`px-4 py-2 ${activeTab === "users" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+        >
+        <Link className="w-full" href={"admin/statistic"}>
+          Thống kê
+        </Link>
         </button>
       </nav>
       <main className="mt-6">{renderTabContent()}</main>

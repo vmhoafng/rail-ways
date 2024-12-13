@@ -1,5 +1,5 @@
 // src/components/admin/DataTable.tsx
-"use-client"
+"use-client";
 interface DataTableProps<T> {
   fields: string[];
   data: T[];
@@ -20,19 +20,24 @@ const DataTable = <T,>({ fields, data, onDelete }: DataTableProps<T>) => {
       </thead>
 
       <tbody>
-        {data?.map((item, index) => (
+        {data?.map((item: any, index) => (
           <tr key={index}>
-            {fields.map((field, fieldIndex) => (
-              <td key={fieldIndex} className="border border-gray-200 px-4 py-2">
-                {(item as any)[field.toLowerCase()] || ""}
-              </td>
-            ))}
+            {fields.map((field, fieldIndex) => {
+              console.log(item[field],field);
+
+              return (
+                <td
+                  key={fieldIndex}
+                  className="border border-gray-200 px-4 py-2">
+                  {(item as any)[field] || ""}
+                </td>
+              );
+            })}
             {onDelete && (
               <td className="border border-gray-200 px-4 py-2">
                 <button
                   onClick={() => onDelete(item)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                >
+                  className="bg-red-500 text-white px-2 py-1 rounded">
                   Xóa
                 </button>
               </td>

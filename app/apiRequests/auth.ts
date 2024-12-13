@@ -20,9 +20,9 @@ const authApiRequest = {
   auth: {
     login: (body: LoginBodyType) =>
       http.post<LoginResponse>("/api/v1/auth/anonymous/login", body),
-    redirectLoginGoogle: () =>
-      http.get<{ linkLoginGoogle: string }>(
-        "/api/v1/auth/anonymous/oauth2/login"
+    getIntoLoginGoogle: (token: string) =>
+      http.get<LoginResponse>(
+        `/api/v1/auth/anonymous/get-info-after-login-google?token=${token}`
       ),
     register: (body: RegisterBodyType) =>
       http.post<RegisterResponse>("/api/v1/auth/anonymous/register", body),

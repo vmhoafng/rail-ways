@@ -9,9 +9,9 @@ import { UserProvider } from "@/contexts/UserContext";
 import { Montserrat } from "next/font/google";
 import { StationsProvider } from "./context/StationsContext";
 import { JourneyProvider } from "./context/JourneyContext";
-import { ScheduleProvider } from "./context/ScheduleContext";
-import { SeatsProvider as SP } from "@/contexts/SeatContext";
+import ChatWidget from "./components/ChatWidget";
 import { SeatsProvider } from "./context/SeatsContext";
+import { ScheduleProvider } from "./context/ScheduleContext";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -23,27 +23,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SP>
-      <ScheduleProvider>
-        <JourneyProvider>
-          <SeatsProvider>
-            <StationsProvider>
-              <html lang="en">
-                <body className={montserrat.className}>
-                  <UserProvider>
-                    <div className="bg-slate-100 flex flex-col">
-                      <Header />
-                      <main className="flex-grow">{children}</main>
-                      <Toaster />
-                      <Footer />
-                    </div>
-                  </UserProvider>
-                </body>
-              </html>
-            </StationsProvider>
-          </SeatsProvider>
-        </JourneyProvider>
-      </ScheduleProvider>
-    </SP>
+    <ScheduleProvider>
+      <JourneyProvider>
+        <SeatsProvider>
+          <StationsProvider>
+            <html lang="en">
+              <body className={montserrat.className}>
+                <UserProvider>
+                  <div className="bg-slate-100 flex flex-col">
+                    <Header />
+                    <ChatWidget />
+                    <main className="flex-grow">{children}</main>
+                    <Toaster />
+                    <Footer />
+                  </div>
+                </UserProvider>
+              </body>
+            </html>
+          </StationsProvider>
+        </SeatsProvider>
+      </JourneyProvider>
+    </ScheduleProvider>
+
   );
 }

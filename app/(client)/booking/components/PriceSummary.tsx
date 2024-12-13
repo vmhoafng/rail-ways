@@ -8,7 +8,7 @@ const PriceSummary: React.FC<PriceSummaryProps> = ({ price }) => {
     return (
         <div className="space-y-2">
             <div className="flex justify-between">
-                <span>Giá vé xe</span>
+                <span>Giá vé tàu</span>
                 <span>{price} đ</span>
             </div>
             <div className="flex justify-between font-bold">

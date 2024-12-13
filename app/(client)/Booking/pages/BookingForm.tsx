@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -15,12 +15,13 @@ import TripInfo from "../components/TripInfo";
 import PriceSummary from "../components/PriceSummary";
 import TripInfoCard from "../components/TripInfoCard";
 import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSeatsContext } from "@/app/context/SeatsContext";
 import { PaymentMethodSelector } from "../components/PaymentMethodSelector";
 import { useScheduleContext } from "@/app/context/ScheduleContext";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import orderApiRequest from "@/app/apiRequests/order";
 
 export default function BookingForm() {
   const { getTrainInfo, updateSelectedSeats, trains } = useSeatsContext();
@@ -35,34 +36,9 @@ export default function BookingForm() {
   const [price, setPrice] = useState(0);
   const [step, setStep] = useState(1);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState("momo");
+  const [paymentMethod, setPaymentMethod] = useState("MOMO");
   const isHavingRoundTrip = searchParams.get("isHaveRoundTrip");
-
-  const fetchSchedule = async (id: any) => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/v1/station/anonymous/get-station/${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${
-              localStorage.getItem("accessToken") || ""
-            }`,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-      const data = await response.json();
-    } catch (err) {}
-  };
-
-  useEffect(() => {
-    fetchSchedule(trains[0]?.trainId);
-  }, []);
-
+  const router = useRouter();
   const handleSeatSelect = (seatNumber: number) => {
     setSelectedSeat(seatNumber);
     setPrice(150000);
@@ -72,7 +48,8 @@ export default function BookingForm() {
     setCustomerInfo((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+
     const data = {
       orderNumber: new Date().getTime(),
       customerName: customerInfo.name,
@@ -80,36 +57,51 @@ export default function BookingForm() {
       totalPrice:
         isHavingRoundTrip === "false"
           ? trains[0].selectedSeats
-              .map((seat) => seat.price)
-              .reduce((sum, num) => sum + num, 0)
+            .map((seat) => seat.price)
+            .reduce((sum, num) => sum + num, 0)
           : trains[0].selectedSeats
-              .map((seat) => seat.price)
-              .reduce((sum, num) => sum + num, 0) +
-            trains[1]?.selectedSeats
-              .map((seat) => seat.price)
-              .reduce((sum, num) => sum + num, 0),
-      scheduleId: trains[0],
-      departureStationId: trains[0]?.trainId,
-      arrivalStationId: trains[1] && trains[1]?.trainId,
+            .map((seat) => seat.price)
+            .reduce((sum, num) => sum + num, 0) +
+          trains[1]?.selectedSeats
+            .map((seat) => seat.price)
+            .reduce((sum, num) => sum + num, 0),
+      scheduleId: trains[0].trainId,
+      departureStationId: schedule[0]?.departureStationId,
+      arrivalStationId: schedule[0]?.arrivalStationId,
       orderItems: [
         ...trains[0].selectedSeats.map((seat) => ({
-          seatId: seat.seatNumber,
+          seatId: seat.seatNumber.split(".")[1],
           price: seat.price,
         })),
       ],
       isHaveRoundTrip: isHavingRoundTrip,
-      roundTripScheduleId: trains[1],
+      roundTripScheduleId: schedule[1]?.trainId,
       roundTripItems:
         isHavingRoundTrip === "true"
           ? [
-              ...trains[1]?.selectedSeats.map((seat) => ({
-                seatId: seat.seatNumber,
-                price: seat.price,
-              })),
-            ]
+            ...trains[1]?.selectedSeats.map((seat) => ({
+              seatId: seat.seatNumber.split(".")[1],
+              price: seat.price,
+            })),
+          ]
           : undefined,
       paymentMethod: paymentMethod,
     };
+    try {
+      const token = localStorage.getItem("accessToken");
+      let result
+      if (token) {
+        result = await orderApiRequest.payment.login(data, token);
+      }
+      else {
+        result = await orderApiRequest.payment.anonymous(data);
+      }
+      localStorage.setItem("data", JSON.stringify(data));
+      router.push("/Booking/verify-token-payment");
+      console.log('Booking successful:', result);
+    } catch (err) {
+      console.error('Booking failed:', err);
+    }
   };
 
   const steps = [
@@ -222,14 +214,14 @@ export default function BookingForm() {
                 price={
                   isHavingRoundTrip === "false"
                     ? trains[0].selectedSeats
-                        .map((seat) => seat.price)
-                        .reduce((sum, num) => sum + num, 0)
+                      .map((seat) => seat.price)
+                      .reduce((sum, num) => sum + num, 0)
                     : trains[0].selectedSeats
-                        .map((seat) => seat.price)
-                        .reduce((sum, num) => sum + num, 0) +
-                      trains[1]?.selectedSeats
-                        .map((seat) => seat.price)
-                        .reduce((sum, num) => sum + num, 0)
+                      .map((seat) => seat.price)
+                      .reduce((sum, num) => sum + num, 0) +
+                    trains[1]?.selectedSeats
+                      .map((seat) => seat.price)
+                      .reduce((sum, num) => sum + num, 0)
                 }
               />
               <PaymentMethodSelector onSelect={setPaymentMethod} />

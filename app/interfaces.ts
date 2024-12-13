@@ -272,6 +272,7 @@ export interface getAllResponse {
 }
 
 export interface TrainBasicInfo {
+  id?: string;
   trainName?: string;
   trainNumber?: string;
   trainType?: string;

@@ -45,7 +45,7 @@ const CarriageManagement = () => {
     return (
         <TabContent
             title="Quản lý Toa"
-            fields={["Tên Toa", "Loại Toa", "Số Ghế", "Ghế Trống"]}
+            fields={["name", "railcarType", "capacity", "seatPerRow"]}
             data={carriages.map((carriage) => ({
                 name: carriage.name,
                 railcarType: carriage.railcarType,

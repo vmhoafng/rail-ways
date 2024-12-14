@@ -22,16 +22,16 @@ import { useScheduleContext } from "@/app/context/ScheduleContext";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import orderApiRequest from "@/app/apiRequests/order";
+import { useToast } from "@/hooks/use-toast";
 
 export default function BookingForm() {
   const { getTrainInfo, updateSelectedSeats, trains } = useSeatsContext();
-
   const { schedule } = useScheduleContext();
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const trainID = searchParams.get("trainID");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [customerInfo, setCustomerInfo] = useState<any>({});
   const [price, setPrice] = useState(0);
   const [step, setStep] = useState(1);
@@ -39,6 +39,8 @@ export default function BookingForm() {
   const [paymentMethod, setPaymentMethod] = useState("MOMO");
   const isHavingRoundTrip = searchParams.get("isHaveRoundTrip");
   const router = useRouter();
+  const { toast } = useToast();
+
   const handleSeatSelect = (seatNumber: number) => {
     setSelectedSeat(seatNumber);
     setPrice(150000);
@@ -46,9 +48,70 @@ export default function BookingForm() {
 
   const handleInfoChange = (field: string, value: string) => {
     setCustomerInfo((prev: any) => ({ ...prev, [field]: value }));
+
+    // Perform validation
+    if (field === "name") {
+      if (!value || value.trim() === "" || value.length < 2) {
+        setError("Tên không được bỏ trống và phải có ít nhất 2 ký tự.");
+      } else {
+        setError(null);
+      }
+    }
+
+    if (field === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value || value.trim() === "" || !emailRegex.test(value)) {
+        setError("Email không được bỏ trống và phải hợp lệ.");
+      } else {
+        setError(null);
+      }
+    }
+
+    if (field === "phone") {
+      const phoneRegex = /^(0|\+84)[1-9][0-9]{8}$/;
+      if (!value || value.trim() === "" || !phoneRegex.test(value)) {
+        setError("Số điện thoại không được bỏ trống và phải hợp lệ.");
+      } else {
+        setError(null);
+      }
+    }
   };
 
   const handleSubmit = async () => {
+    // Ensure all required fields are valid
+    if (!customerInfo.name || customerInfo.name.trim() === "" || customerInfo.name.length < 2) {
+      toast({
+        title: "Lỗi thông tin",
+        description: "Tên không được bỏ trống và phải có ít nhất 2 ký tự.",
+        duration: 3000,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!customerInfo.email || customerInfo.email.trim() === "" || !emailRegex.test(customerInfo.email)) {
+      toast({
+        title: "Lỗi thông tin",
+        description: "Email không được bỏ trống và phải hợp lệ.",
+        duration: 3000,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const phoneRegex = /^(0|\+84)[1-9][0-9]{8}$/;
+    if (!customerInfo.phone || customerInfo.phone.trim() === "" || !phoneRegex.test(customerInfo.phone)) {
+      toast({
+        title: "Lỗi thông tin",
+        description: "Số điện thoại không được bỏ trống và phải hợp lệ.",
+        duration: 3000,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setError(null); // Clear any existing errors
 
     const data = {
       orderNumber: new Date().getTime(),
@@ -87,20 +150,26 @@ export default function BookingForm() {
           : undefined,
       paymentMethod: paymentMethod,
     };
+
     try {
       const token = localStorage.getItem("accessToken");
-      let result
+      let result;
       if (token) {
         result = await orderApiRequest.payment.login(data, token);
-      }
-      else {
+      } else {
         result = await orderApiRequest.payment.anonymous(data);
       }
       localStorage.setItem("data", JSON.stringify(data));
       router.push("/Booking/verify-token-payment");
-      console.log('Booking successful:', result);
+      console.log("Booking successful:", result);
     } catch (err) {
-      console.error('Booking failed:', err);
+      console.error("Booking failed:", err);
+      toast({
+        title: "Lỗi đặt vé",
+        description: "Đã xảy ra lỗi khi đặt vé. Vui lòng thử lại.",
+        duration: 3000,
+        variant: "destructive",
+      });
     }
   };
 
@@ -246,14 +315,16 @@ export default function BookingForm() {
                 className={cn(
                   "flex items-center",
                   step === s.id ? "text-primary" : "text-gray-400"
-                )}>
+                )}
+              >
                 <div
                   className={cn(
                     "w-6 h-6 rounded-full flex items-center justify-center border",
                     step === s.id
                       ? "border-primary text-primary"
                       : "border-gray-300"
-                  )}>
+                  )}
+                >
                   {s.id}
                 </div>
                 <span className="ml-1 hidden sm:inline">{s.title}</span>
@@ -315,7 +386,8 @@ export default function BookingForm() {
               } else {
                 handleSubmit();
               }
-            }}>
+            }}
+          >
             {step < 4 ? "Tiếp tục" : "Xác nhận đặt vé"}
           </Button>
         </div>

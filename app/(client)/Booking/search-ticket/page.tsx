@@ -46,7 +46,7 @@ export default function BookedTicketPage() {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container-custom mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Tìm kiếm vé đã đặt</h1>
 
             <form onSubmit={searchTicket} className="flex gap-2 mb-4">

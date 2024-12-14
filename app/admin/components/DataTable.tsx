@@ -23,8 +23,6 @@ const DataTable = <T,>({ fields, data, onDelete }: DataTableProps<T>) => {
         {data?.map((item: any, index) => (
           <tr key={index}>
             {fields.map((field, fieldIndex) => {
-              console.log(item[field],field);
-
               return (
                 <td
                   key={fieldIndex}

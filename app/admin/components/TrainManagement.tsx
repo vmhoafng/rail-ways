@@ -1,4 +1,3 @@
-// src/components/admin/TrainManagement.tsx
 import React, { useEffect, useState } from "react";
 import TabContent from "./TabContent";
 import { TrainBasicInfo } from "@/app/interfaces";
@@ -12,9 +11,9 @@ const TrainManagement = () => {
     const accessToken = localStorage.getItem("accessToken") || "";
     try {
       const response = await adminApiRequests.train.getAll(accessToken);
-      console.log("API Response: ", response); // Xem toàn bộ phản hồi
+      console.log("API Response: ", response);
       if (response.payload && response.payload.result) {
-        setTrains(response.payload.result); // Chỉ gọi `setTrains` khi dữ liệu đúng
+        setTrains(response.payload.result);
       } else {
         console.error("Invalid API Response: ", response.payload);
       }
@@ -29,27 +28,46 @@ const TrainManagement = () => {
       await fetchTrains();
       setLoading(false);
     };
-    fetchData(); // Gọi hàm bên trong `useEffect`
+    fetchData();
   }, []);
-  console.log(
-    trains.map((train) => ({
-      trainName: train.trainName,
-      trainNumber: train.trainNumber,
-      trainType: train.trainType,
-      trainStatus: train.trainStatus,
-    }))
-  );
+
+  const handleAddTrain = async (newTrain: any) => {
+    const accessToken = localStorage.getItem("accessToken") || "";
+    console.log(newTrain);
+
+    try {
+      await adminApiRequests.train.create(newTrain, accessToken);
+      fetchTrains(); // Refresh Train list
+    } catch (error) {
+      console.error("Error adding/updating Train:", error);
+    }
+  };
+
+  const displayFields = [
+    "trainNumber",
+    "trainName",
+    "trainType",
+    "trainStatus",
+  ];
+  const addFields = [
+    { name: "trainName", label: "Tên tàu", type: "text" },
+    { name: "trainNumber", label: "Số hiệu tàu", type: "text" },
+    { name: "trainType", label: "Loại tàu", type: "text" },
+    { name: "currentStationId", label: "Ga hiện tại", type: "text" },
+  ];
 
   return (
     <TabContent
       title="Quản lý Tàu"
-      fields={["trainNumber", "trainName", "trainType", "trainStatus",]}
+      displayFields={displayFields}
+      addFields={addFields}
       data={trains.map((train) => ({
         trainName: train.trainName,
         trainNumber: train.trainNumber,
         trainType: train.trainType,
         trainStatus: train.trainStatus,
       }))}
+      onAdd={handleAddTrain}
       loading={loading}
     />
   );
